@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     'system_administration',
     'access_ctrl',
     'access_ctrl.apps.CustomAuthConfig',
+    'hackathon'
 ]
 
 MIDDLEWARE = [
