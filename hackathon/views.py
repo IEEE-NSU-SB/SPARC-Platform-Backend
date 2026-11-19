@@ -408,13 +408,10 @@ def submit_phase02(request):
 
         try:
             payload = json.loads(request.body)
-        except json.JSONDecodeError:
-            return JsonResponse(
-                {'success': False, 'message': 'Invalid request payload format.'},
-                status=400,
-            )
+        except (json.JSONDecodeError, UnicodeDecodeError):
+            payload = request.POST.dict()
 
-        token = (payload.get('token') or '').strip()
+        token = (payload.get('token') or request.POST.get('token') or '').strip()
         if not token:
             return JsonResponse(
                 {'success': False, 'message': 'Token was not provided.'},
@@ -450,7 +447,8 @@ def submit_phase02(request):
                 status=400,
             )
 
-        sender_number = _normalize_phone(payload.get('sender_number', ''))
+        raw_sender = (payload.get('sender_number') or phase1_team.leader_phone or '').strip()
+        sender_number = _normalize_phone(raw_sender)
         if not re.match(r'^(?:\+?88)?01[3-9]\d{8}$', sender_number):
             return JsonResponse(
                 {'success': False, 'message': 'Please enter a valid 11-digit Bangladeshi sender phone number.'},
@@ -471,6 +469,11 @@ def submit_phase02(request):
             )
 
         member_tshirts = payload.get('member_tshirts', {}) or {}
+        if not member_tshirts:
+            for k, v in payload.items():
+                if k.startswith('tshirt_size_'):
+                    m_id = k.replace('tshirt_size_', '')
+                    member_tshirts[m_id] = v
         valid_sizes = {'S', 'M', 'L', 'XL', '2XL', '3XL'}
 
         size_by_id = {}
