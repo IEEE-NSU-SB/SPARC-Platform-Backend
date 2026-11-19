@@ -14,6 +14,8 @@ from emails.views import send_participant_phase02_email, send_registration_email
 from django.db.models import Count, Q
 from django.db.models.functions import Trim
 
+from hackathon.utils import get_phase01_tab_counts
+
 from .models import *
 
 def _get_publish_status_phase01() -> bool:
@@ -629,8 +631,9 @@ def response_table(request):
         'participants': participants,
         'registration_stats': summary,
         'university_data': university_data,
-        'reg_stats':reg_stats,
-        'has_perm':permissions
+        'reg_stats': reg_stats,
+        'has_perm': permissions,
+        'tab_counts': get_phase01_tab_counts(),
     }
     return render(request, 'response_table.html', context)
 

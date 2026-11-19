@@ -57,7 +57,7 @@ def form_phase01(request):
         'is_published': _get_publish_status_phase01(),
         'registration_closed': registration_closed,
     }
-    return render(request, 'hackathon/form_phase01.html', context)
+    return render(request, 'hackathon_form_phase01.html', context)
 
 
 @login_required
@@ -83,7 +83,7 @@ def admin_phase01(request):
         'people_count': people_count,
         'has_perm': permissions,
     }
-    return render(request, 'hackathon/form_phase01.html', context)
+    return render(request, 'hackathon_form_phase01.html', context)
 
 
 @login_required
@@ -316,7 +316,7 @@ def response_table_phase01(request):
         'tab_counts': get_phase01_tab_counts(),
         'has_perm': permissions,
     }
-    return render(request, 'hackathon/response_table_phase01.html', context)
+    return render(request, 'hackathon_response_table_phase01.html', context)
 
 
 @login_required
@@ -331,7 +331,7 @@ def view_response_phase01(request, id):
         'team': team,
         'members': team.members.all(),
     }
-    return render(request, 'hackathon/team_response_phase01.html', context)
+    return render(request, 'hackathon_team_response_phase01.html', context)
 
 
 @login_required

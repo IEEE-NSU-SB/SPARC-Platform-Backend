@@ -4,7 +4,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>SPAC 2025 | Registration Dashboard</title>
+    <title>SPARC 2026 | Phase 01 Response Table</title>
     <link rel="icon" href="{% static '/img/logo.gif' %}" />
 
     <!-- Tailwind & DaisyUI -->
@@ -21,13 +21,27 @@
         background-color: #002855;
         z-index: -10;
       }
-      tbody tr {
+      #participantsTable tbody tr {
         transition: all 0.2s ease-in-out;
         cursor: pointer;
         text-align: center;
       }
-      tbody tr:hover {
+      #participantsTable tbody tr:hover {
         background-color: #00285517;
+      }
+      .back-btn {
+        background: #ffffff;
+        color: #002855;
+        padding: 8px 16px;
+        border-radius: 6px;
+        border: 2px solid #ffffff;
+        font-weight: 600;
+        text-decoration: none;
+        transition: all 0.25s ease;
+      }
+      .back-btn:hover {
+        background: #dbeafe;
+        border-color: #dbeafe;
       }
       .logout {
         background: #c22d2d85;
@@ -35,6 +49,7 @@
         padding: 8px 16px;
         border-radius: 6px;
         border: 2px solid #c22d2d;
+        text-decoration: none;
       }
       .logout:hover {
         background: #c22d2d;
@@ -46,6 +61,7 @@
         padding: 8px 16px;
         border-radius: 6px;
         border: 2px solid #e49e35;
+        cursor: pointer;
       }
       .statistics:hover {
         background: #e49e35;
@@ -67,50 +83,62 @@
 
     <div class="relative w-11/12 max-w-7xl mx-auto py-10 z-10">
       <!-- Header -->
-      <div class="relative mb-20">
+      <div class="relative mb-12">
         <div class="relative flex justify-center">
           <span
-            class="px-10 py-3 text-[#fff] bg-[#002855] border-2 border-white text-xl md:text-3xl rounded-xl shadow-[2px_4px_0_0_#fff]"
+            class="px-10 py-3 text-[#fff] bg-[#002855] border-2 border-white text-xl md:text-3xl rounded-xl shadow-[2px_4px_0_0_#fff] text-center"
           >
             Phase 01 Response Table
           </span>
         </div>
       </div>
 
-      <!-- New row for additional buttons -->
-      <div class="flex items-center gap-4 justify-between mb-12">
-        <a href="{% url 'core:logout' %}" class="logout">Logout</a>
-        <!-- Statistics Button -->
+      <!-- Top Utility Bar: Back, Logout, Statistics -->
+      <div class="flex flex-wrap items-center gap-4 justify-between mb-10">
+        <a href="{% url 'registration:reg_landing' %}" class="back-btn">
+          &larr; Back
+        </a>
+
+        <div class="flex items-center gap-3">
+          <a href="{% url 'core:logout' %}" class="logout">Logout</a>
           {% if has_perm.view_finance_info %}
-            <button class="statistics" onclick="document.getElementById('statsModal').showModal()">
+            <button
+              type="button"
+              class="statistics"
+              onclick="document.getElementById('statsModal').showModal()"
+            >
               Statistics
             </button>
           {% endif %}
+        </div>
       </div>
-      
+
       <!-- Controls -->
-      <div class="flex justify-between items-start max-md:flex-col-reverse flex-wrap max-md:gap-5 mb-5">
+      <div class="flex justify-between items-start max-md:flex-col-reverse flex-wrap max-md:gap-5 mb-6">
         <input
-        id="tableSearch"
-        type="text"
+          id="tableSearch"
+          type="text"
           placeholder="Search by name or email"
-          class="px-4 py-2 w-full max-md:mr-3 md:w-1/2 rounded-lg shadow-sm border-2 focus:border-[#ffffffab] focus:outline-none text-white"
+          class="px-4 py-2 w-full max-md:mr-3 md:w-1/2 rounded-lg shadow-sm bg-white/10 border-2 border-white/50 focus:border-[#ffffffab] focus:outline-none text-white"
         />
-        
-        <div class="flex justify-end gap-4 mb-5 max-md:justify-center items-center max-md:flex-wrap max-md:mx-auto">
+
+        <div class="flex justify-end gap-4 max-md:justify-center items-center max-md:flex-wrap max-md:mx-auto">
           <button
+            type="button"
             id="selectAllBtn"
             class="px-5 py-2 max-md:w-full max-md:mr-3 bg-[#1b395c] text-white rounded-lg shadow hover:bg-[#00629B] border-2 transition-all duration-300 ease-in-out"
           >
-          Select All
+            Select All
           </button>
           <button
-          id="saveBtn"
+            type="button"
+            id="saveBtn"
             class="px-5 py-2 max-md:w-full max-md:mr-3 bg-[#1b395c] text-white rounded-lg shadow hover:bg-[#00629B] border-2 transition-all duration-300 ease-in-out"
-            >
+          >
             Save Selections
           </button>
           <button
+            type="button"
             id="sendMailBtn"
             class="px-5 py-2 max-md:w-full max-md:mr-3 bg-[#1b5c4a] text-white rounded-lg shadow hover:bg-[#009b55] border-2 transition-all duration-300 ease-in-out"
           >
@@ -119,9 +147,37 @@
         </div>
       </div>
 
+      <!-- Inline Standalone URL-Backed Folder Tabs (Attached Flush to Table Container) -->
+      <nav class="flex flex-wrap items-end gap-1.5" aria-label="Phase 1 Response Lists">
+        <a
+          href="{% url 'registration:response_table_phase01' %}"
+          class="px-5 py-3 rounded-t-xl bg-[#1b395c] text-white font-semibold text-sm border-2 border-b-0 border-white/40 relative z-10"
+          aria-current="page"
+        >
+          Participants ({{ tab_counts.participants_count|default:0 }})
+        </a>
+
+        <a
+          href="{% url 'hackathon:response_table_phase01' %}"
+          class="px-5 py-2.5 rounded-t-xl bg-blue-100 text-[#1b395c] hover:bg-white font-semibold text-sm border-2 border-b-0 border-white/40 transition-all"
+        >
+          Hackathon ({{ tab_counts.hackathon_teams_count|default:0 }} teams &bull; {{ tab_counts.hackathon_people_count|default:0 }} people)
+        </a>
+
+        {% comment %}
+          Teammate Slot: Uncomment when Ambassadors Phase 1 response table is ready.
+          <a
+            href="{% url 'ambassadors:response_table_phase01' %}"
+            class="px-5 py-2.5 rounded-t-xl bg-blue-100 text-[#1b395c] hover:bg-white font-semibold text-sm border-2 border-b-0 border-white/40 transition-all"
+          >
+            Ambassadors ({{ tab_counts.ambassadors_count|default:0 }})
+          </a>
+        {% endcomment %}
+      </nav>
+
       <!-- Table -->
-      <div class="bg-white rounded-xl shadow-lg overflow-x-auto max-h-[450px]">
-        <table class="min-w-full text-sm">
+      <div class="bg-white rounded-b-xl rounded-tr-xl shadow-lg overflow-x-auto max-h-[450px]">
+        <table id="participantsTable" class="min-w-full text-sm">
           <thead class="sticky top-0 z-10">
             <tr class="bg-[#1b395c] text-white">
               <th class="px-4 py-3">ID</th>
@@ -138,35 +194,38 @@
               class="border-b"
               data-href="{% url 'registration:view_response' p.id %}"
             >
-            <td class="px-4 py-3">{{ p.id }}</td>
-            <td class="px-4 py-3">{{ p.name }}</td>
-            <td class="px-4 py-3">{{ p.university }}</td>
-            <td class="px-4 py-3">{{ p.email }}</td>
-            <td class="px-4 py-3">
-              <input
-                type="checkbox"
-                class="phase2Check"
-                data-id="{{p.id}}"
-                {% if p.is_selected %}checked{% endif %}
-              />
-            </td>
+              <td class="px-4 py-3">{{ p.id }}</td>
+              <td class="px-4 py-3">{{ p.name }}</td>
+              <td class="px-4 py-3">{{ p.university }}</td>
+              <td class="px-4 py-3">{{ p.email }}</td>
+              <td class="px-4 py-3">
+                <input
+                  type="checkbox"
+                  class="phase2Check"
+                  data-id="{{ p.id }}"
+                  {% if p.is_selected %}checked{% endif %}
+                />
+              </td>
               <td class="px-4 py-3">
                 {% if p.is_phase_2_email_sent %}
                 <span
                   class="px-3 py-1 text-xs bg-green-100 text-green-700 rounded-full"
-                  >Email Sent</span
                 >
+                  Email Sent
+                </span>
                 {% else %}
                   {% if p.is_selected %}
                   <span
                     class="px-3 py-1 text-xs bg-red-100 text-red-700 rounded-full"
-                    >Pending</span
                   >
+                    Pending
+                  </span>
                   {% else %}
                   <span
                     class="px-3 py-1 text-xs bg-yellow-100 text-yellow-700 rounded-full text-nowrap"
-                    >Not Selected</span
                   >
+                    Not Selected
+                  </span>
                   {% endif %}
                 {% endif %}
               </td>
@@ -184,69 +243,69 @@
 
       <!-- Footer -->
       <div class="text-center mt-6 text-gray-200 text-sm italic">
-        2025 © IEEE NSU Student Branch
+        2026 &copy; IEEE NSU Student Branch
       </div>
     </div>
 
     {% if has_perm.view_finance_info %}
-        <!-- Modal -->
-      <dialog id="statsModal" class="modal">
-        <div class="modal-box max-w-3xl">
-          <h2 class="text-2xl font-bold mb-4">Statistics</h2>
+    <!-- Modal -->
+    <dialog id="statsModal" class="modal">
+      <div class="modal-box max-w-3xl">
+        <h2 class="text-2xl font-bold mb-4">Statistics</h2>
 
-          <div class="overflow-x-auto">
-            <table class="table table-zebra w-full border" style='text-align: center;'>
-              <thead class="bg-[#112640] text-white">
-                <tr>
-                  <th class="py-2 px-4 rounded-tl-lg">Membership Grade</th>
-                  <th class="py-2 px-4">Count</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td class="py-2 px-4">IEEE Member</td>
-                  <td class="py-2 px-4">{{registration_stats.member|default:0}}</td>
-                </tr>
-                <tr>
-                  <td class="py-2 px-4">Non-IEEE Member</td>
-                  <td class="py-2 px-4">{{registration_stats.non_ieee|default:0}}</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-          
-          <!-- Total -->
-          <div class="mt-4 text-left font-bold text-lg">
-            <p style="font-size:smaller;">
-            Total Registrations: <span class="text-green-600">{{reg_stats.total_registrations}}</span>
-            </p>
-            <p style="font-size:smaller;">
-            Total Selected: <span class="text-green-600">{{reg_stats.total_selected}}</span>
-            </p>
-            <br>
-            <p style="font-weight: normal;">University List :</p>
-            <ul>
-              {% for uni in university_data  %}
-              <li class="flex items-center px-4 py-2 my-2 text-sm 
-                        text-gray-800 bg-gray-100 rounded-md shadow-sm hover:bg-gray-200">
-                  <span class="font-medium">{{ uni.university_sanitized }}</span>
-                  <span class="ml-2 text-gray-500">–</span>
-                  <span class="ml-2 text-gray-700 font-bold">[{{ uni.total }}]</span>
-              </li>
-              {% endfor %}
-            </ul>
-          </div>
-          
-          <!-- Actions -->
-          <div class="modal-action">
-            <form method="dialog">
-              <button class="btn close">Close</button>
-            </form>
-          </div>
+        <div class="overflow-x-auto">
+          <table class="table table-zebra w-full border" style="text-align: center;">
+            <thead class="bg-[#112640] text-white">
+              <tr>
+                <th class="py-2 px-4 rounded-tl-lg">Membership Grade</th>
+                <th class="py-2 px-4">Count</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="py-2 px-4">IEEE Member</td>
+                <td class="py-2 px-4">{{ registration_stats.member|default:0 }}</td>
+              </tr>
+              <tr>
+                <td class="py-2 px-4">Non-IEEE Member</td>
+                <td class="py-2 px-4">{{ registration_stats.non_ieee|default:0 }}</td>
+              </tr>
+            </tbody>
+          </table>
         </div>
-      </dialog>
-      {% endif %}
-    </div>
+
+        <!-- Total -->
+        <div class="mt-4 text-left font-bold text-lg">
+          <p style="font-size: smaller;">
+            Total Registrations: <span class="text-green-600">{{ reg_stats.total_registrations }}</span>
+          </p>
+          <p style="font-size: smaller;">
+            Total Selected: <span class="text-green-600">{{ reg_stats.total_selected }}</span>
+          </p>
+          <br />
+          <p style="font-weight: normal;">University List :</p>
+          <ul>
+            {% for uni in university_data %}
+            <li
+              class="flex items-center px-4 py-2 my-2 text-sm text-gray-800 bg-gray-100 rounded-md shadow-sm hover:bg-gray-200"
+            >
+              <span class="font-medium">{{ uni.university_sanitized }}</span>
+              <span class="ml-2 text-gray-500">&ndash;</span>
+              <span class="ml-2 text-gray-700 font-bold">[{{ uni.total }}]</span>
+            </li>
+            {% endfor %}
+          </ul>
+        </div>
+
+        <!-- Actions -->
+        <div class="modal-action">
+          <form method="dialog">
+            <button class="btn close">Close</button>
+          </form>
+        </div>
+      </div>
+    </dialog>
+    {% endif %}
 
     <!-- Scripts -->
     <script>
@@ -254,7 +313,7 @@
         .getElementById("tableSearch")
         .addEventListener("input", function () {
           const q = this.value.toLowerCase();
-          document.querySelectorAll("tbody tr").forEach((row) => {
+          document.querySelectorAll("#participantsTable tbody tr").forEach((row) => {
             const name = row.children[1]?.innerText.toLowerCase() || "";
             const email = row.children[3]?.innerText.toLowerCase() || "";
             const uni = row.children[2]?.innerText.toLowerCase() || "";
@@ -264,7 +323,7 @@
         });
 
       // Row click
-      document.querySelectorAll("tbody tr").forEach((row) => {
+      document.querySelectorAll("#participantsTable tbody tr").forEach((row) => {
         row.addEventListener("click", (e) => {
           if (e.target.type !== "checkbox") {
             const link = row.dataset.href;
@@ -273,45 +332,38 @@
         });
       });
 
-      // Send Mail Button (Frontend only)
+      // Send Mail Button
       document.getElementById("sendMailBtn").addEventListener("click", () => {
-        // const selected = [
-        //   ...document.querySelectorAll(".phase2Check:checked:not(:disabled)"),
-        // ].map((cb) => cb.dataset.id);
+        if (!confirm("Phase-2 emails will be sent now. Are you sure?")) {
+          return;
+        }
 
-        // if (!selected.length) {
-        //   alert("No participants selected");
-        //   return;
-        // }
-
-        alert("Phase-2 emails will be sent now. Are you sure?");
-        
         fetch("{% url 'registration:send_phase02_email' %}", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            "X-CSRFToken": '{{csrf_token}}',
+            "X-CSRFToken": "{{ csrf_token }}",
           },
         })
-        .then(response => response.json())
-        .then(data => {
-          alert(data.message);
-          window.location.reload();
-        })
-        .catch(error => {
-          console.error("Error while sending emails:", error);
-          alert("Failed to send emails.");
-        });
+          .then((response) => response.json())
+          .then((data) => {
+            alert(data.message);
+            window.location.reload();
+          })
+          .catch((error) => {
+            console.error("Error while sending emails:", error);
+            alert("Failed to send emails.");
+          });
       });
 
-      // Add Select All button listener here
+      // Select All button
       document.getElementById("selectAllBtn").addEventListener("click", () => {
         const checkboxes = document.querySelectorAll(".phase2Check:not(:disabled)");
-        const allChecked = [...checkboxes].every(cb => cb.checked);
-        checkboxes.forEach(cb => cb.checked = !allChecked);
+        const allChecked = [...checkboxes].every((cb) => cb.checked);
+        checkboxes.forEach((cb) => (cb.checked = !allChecked));
       });
 
-      // Add Save button listener here
+      // Save button
       document.getElementById("saveBtn").addEventListener("click", () => {
         const selected = [
           ...document.querySelectorAll(".phase2Check:checked:not(:disabled)"),
@@ -326,19 +378,19 @@
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            "X-CSRFToken": '{{csrf_token}}',  // Add CSRF if needed
+            "X-CSRFToken": "{{ csrf_token }}",
           },
           body: JSON.stringify({ selected_ids: selected }),
         })
-        .then(response => response.json())
-        .then(data => {
-          alert("Selections saved successfully!");
-          window.location.reload();
-        })
-        .catch(error => {
-          console.error("Error saving selections:", error);
-          alert("Failed to save selections.");
-        });
+          .then((response) => response.json())
+          .then((data) => {
+            alert("Selections saved successfully!");
+            window.location.reload();
+          })
+          .catch((error) => {
+            console.error("Error saving selections:", error);
+            alert("Failed to save selections.");
+          });
       });
 
       // Particles
