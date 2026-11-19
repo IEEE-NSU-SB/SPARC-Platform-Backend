@@ -4,7 +4,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>SPAC 2025 | Registration Dashboard</title>
+    <title>SPARC 2026 | Registration Dashboard</title>
     <link rel="icon" href="{% static '/img/logo.gif' %}" />
 
     <!-- Tailwind & DaisyUI -->
@@ -107,12 +107,21 @@
             placeholder="Search by name or email"
             class="px-4 py-2 w-full max-md:mr-3 md:w-1/2 rounded-lg shadow-sm border-2 focus:border-[#ffffffab] focus:outline-none text-white"
           />
-          <button
-          id="saveBtn"
-            class="px-5 py-2 max-md:w-full max-md:mr-3 bg-[#1b395c] text-white rounded-lg shadow hover:bg-[#00629B] border-2 transition-all duration-300 ease-in-out"
-            >
-            Save Selections
-          </button>        
+          <div class="flex gap-2 max-md:w-full">
+            <button
+            id="saveBtn"
+              class="px-5 py-2 max-md:w-full bg-[#1b395c] text-white rounded-lg shadow hover:bg-[#00629B] border-2 transition-all duration-300 ease-in-out cursor-pointer"
+              >
+              Save Selections
+            </button>
+            <button
+            id="moveToQrBtn"
+              class="px-5 py-2 max-md:w-full bg-[#1b5c4a] text-white rounded-lg shadow hover:bg-[#009b55] border-2 transition-all duration-300 ease-in-out cursor-pointer"
+              title="Import confirmed participants to the unified QR Dashboard"
+              >
+              Move to QR Dashboard
+            </button>
+          </div>        
       </div>
 
       <!-- Inline Standalone URL-Backed Folder Tabs (Attached Flush to Table Container) -->
@@ -179,7 +188,7 @@
 
       <!-- Footer -->
       <div class="text-center mt-6 text-gray-200 text-sm italic">
-        2025 © IEEE NSU Student Branch
+        2026 © IEEE NSU Student Branch
       </div>
     </div>
 
@@ -314,6 +323,41 @@
           alert("Failed to save selections.");
         });
       });
+
+      // Move to QR Dashboard listener
+      const moveToQrBtn = document.getElementById("moveToQrBtn");
+      if (moveToQrBtn) {
+        moveToQrBtn.addEventListener("click", () => {
+          moveToQrBtn.disabled = true;
+          const orig = moveToQrBtn.textContent;
+          moveToQrBtn.textContent = "Moving...";
+          fetch("/init/import_reg_participants/", {
+            method: "GET",
+            headers: { "X-Requested-With": "XMLHttpRequest" }
+          })
+          .then(r => r.json())
+          .then(data => {
+            if (data.message === "success") {
+              const openDash = confirm(`Participants imported to QR Dashboard successfully! (${data.imported_count || 0} newly added).\n\nDo you want to open the QR Dashboard now?`);
+              if (openDash) {
+                window.location.href = "{% url 'core:dashboard' %}";
+              } else {
+                window.location.reload();
+              }
+            } else {
+              alert(data.message || "Failed to import participants.");
+            }
+          })
+          .catch(err => {
+            console.error("Import error:", err);
+            alert("Network error while importing to QR Dashboard.");
+          })
+          .finally(() => {
+            moveToQrBtn.disabled = false;
+            moveToQrBtn.textContent = orig;
+          });
+        });
+      }
 
       // Row click
       document.querySelectorAll("tbody tr").forEach((row) => {

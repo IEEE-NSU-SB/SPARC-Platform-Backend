@@ -911,6 +911,79 @@ class HackathonPhase02TestCase(TestCase):
         )
         self.assertIn("hackathon_phase02_data.xlsx", response["Content-Disposition"])
 
+    def test_phase2_import_to_qr_dashboard(self):
+        """Confirmed Hackathon Phase 2 team members are imported individually into core Registered_Participant."""
+        from core.models import Registered_Participant
+        from core.renderData import Core
+
+        self.client.force_login(self.admin_user)
+        p2_team = HackathonTeam_Phase02.objects.create(
+            phase1_team=self.team1,
+            team_name=self.team1.team_name,
+            team_size=self.team1.team_size,
+            leader_email=self.team1.leader_email,
+            leader_phone=self.team1.leader_phone,
+            payment_method="Bkash",
+            sender_number="01719999001",
+            transaction_id="TRXQRIMPORT1",
+            is_payment_confirmed=True,
+        )
+        HackathonMember_Phase02.objects.create(
+            team=p2_team,
+            phase1_member=self.m1,
+            member_order=1,
+            is_leader=True,
+            full_name=self.m1.full_name,
+            email=self.m1.email,
+            phone_number=self.m1.phone_number,
+            university=self.m1.university,
+            department=self.m1.department,
+            academic_year=self.m1.academic_year,
+            student_id=self.m1.student_id,
+            tshirt_size="L",
+        )
+        HackathonMember_Phase02.objects.create(
+            team=p2_team,
+            phase1_member=self.m2,
+            member_order=2,
+            is_leader=False,
+            full_name=self.m2.full_name,
+            email=self.m2.email,
+            phone_number=self.m2.phone_number,
+            university=self.m2.university,
+            department=self.m2.department,
+            academic_year=self.m2.academic_year,
+            student_id=self.m2.student_id,
+            tshirt_size="M",
+        )
+
+        # Trigger import via the core endpoint
+        response = self.client.get("/init/import_reg_participants/")
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()["message"], "success")
+
+        # Verify participants are in Registered_Participant individually
+        leader_p = Registered_Participant.objects.filter(email=self.m1.email).first()
+        self.assertIsNotNone(leader_p)
+        self.assertEqual(leader_p.name, self.m1.full_name)
+        self.assertEqual(leader_p.t_shirt_size, "L")
+        self.assertIn("Hackathon -", leader_p.role)
+        self.assertIn("Leader", leader_p.role)
+        self.assertTrue(bool(leader_p.unique_code))
+
+        member2_p = Registered_Participant.objects.filter(email=self.m2.email).first()
+        self.assertIsNotNone(member2_p)
+        self.assertEqual(member2_p.name, self.m2.full_name)
+        self.assertEqual(member2_p.t_shirt_size, "M")
+        self.assertIn("Member 2", member2_p.role)
+        self.assertTrue(bool(member2_p.unique_code))
+
+        # Idempotency check: running import again doesn't duplicate
+        res2 = self.client.get("/init/import_reg_participants/")
+        self.assertEqual(res2.status_code, 200)
+        self.assertEqual(res2.json()["imported_count"], 0)
+        self.assertEqual(Registered_Participant.objects.filter(email=self.m1.email).count(), 1)
+
 
 if __name__ == "__main__":
     import os, django

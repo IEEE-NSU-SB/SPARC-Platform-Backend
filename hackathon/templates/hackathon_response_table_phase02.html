@@ -165,6 +165,14 @@
           >
             Save Selections
           </button>
+          <button
+            type="button"
+            id="moveToQrBtn"
+            class="px-5 py-2 max-md:w-full bg-[#1b5c4a] text-white rounded-lg shadow hover:bg-[#009b55] border-2 border-white/70 transition-all duration-300 ease-in-out cursor-pointer"
+            title="Import confirmed team members to the unified QR Dashboard"
+          >
+            Move to QR Dashboard
+          </button>
         </div>
         {% endif %}
       </div>
@@ -469,6 +477,42 @@
             } finally {
               saveBtn.disabled = false;
               saveBtn.textContent = originalText;
+            }
+          });
+        }
+
+        // 6. Move Confirmed Teams to QR Dashboard
+        const moveToQrBtn = document.getElementById("moveToQrBtn");
+        if (moveToQrBtn) {
+          moveToQrBtn.addEventListener("click", async function () {
+            moveToQrBtn.disabled = true;
+            const originalText = moveToQrBtn.textContent;
+            moveToQrBtn.textContent = "Moving...";
+
+            try {
+              const res = await fetch("/init/import_reg_participants/", {
+                method: "GET",
+                headers: { "X-Requested-With": "XMLHttpRequest" }
+              });
+              const data = await res.json();
+              if (res.ok && data.message === "success") {
+                const confirmed = confirm(
+                  `Confirmed team members imported to QR Dashboard successfully! (${data.imported_count || 0} newly added).\n\nDo you want to open the QR Dashboard now?`
+                );
+                if (confirmed) {
+                  window.location.href = "{% url 'core:dashboard' %}";
+                } else {
+                  window.location.reload();
+                }
+              } else {
+                alert(data.message || "Failed to import team members to QR Dashboard.");
+              }
+            } catch (err) {
+              console.error("Error importing to QR Dashboard:", err);
+              alert("Network error while importing to QR Dashboard.");
+            } finally {
+              moveToQrBtn.disabled = false;
+              moveToQrBtn.textContent = originalText;
             }
           });
         }

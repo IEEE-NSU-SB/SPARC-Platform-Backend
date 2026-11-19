@@ -169,22 +169,91 @@ class Core:
         return unique_code
     
     def import_participants_from_reg():
-        '''Imports all participants from form_participant table to registered_participant table and also generates their unique codes\n
-            This is done when participants are confirmed for event.'''
-        
-        objects = [
-            Registered_Participant(
-                name=participant.name,
-                university=participant.institution,
-                contact_no=participant.contact_number,
-                email=participant.email,
-                t_shirt_size=participant.tshirt_size,
-                unique_code=Core.generate_unique_code(participant.name, participant.institution),
+        '''Imports all confirmed participants and hackathon team members to registered_participant table and generates their unique codes.
+            This is done when participants/teams are confirmed for event.'''
+        from registration.models import Form_Participant_Phase_2
+        from hackathon.models import HackathonTeam_Phase02
+
+        existing_emails = set(
+            Registered_Participant.objects.exclude(email__isnull=True)
+            .exclude(email='')
+            .values_list('email', flat=True)
+        )
+        existing_codes = set(
+            Registered_Participant.objects.values_list('unique_code', flat=True)
+        )
+
+        objects = []
+
+        # 1. General Participants from Registration Phase 2
+        p2_qs = Form_Participant_Phase_2.objects.all()
+        if p2_qs.filter(is_payment_confirmed=True).exists():
+            p2_qs = p2_qs.filter(is_payment_confirmed=True)
+
+        for participant in p2_qs:
+            email_clean = (participant.email or '').strip().lower()
+            if email_clean and email_clean in existing_emails:
+                continue
+
+            unique_code = Core.generate_unique_code(participant.name, participant.institution or 'University')
+            while unique_code in existing_codes:
+                unique_code = Core.generate_unique_code(participant.name, participant.institution or 'University')
+            existing_codes.add(unique_code)
+
+            if email_clean:
+                existing_emails.add(email_clean)
+
+            objects.append(
+                Registered_Participant(
+                    name=participant.name,
+                    university=participant.institution,
+                    contact_no=participant.contact_number,
+                    email=participant.email,
+                    role="Participant",
+                    t_shirt_size=participant.tshirt_size,
+                    unique_code=unique_code,
+                )
             )
-            for participant in Form_Participant_Phase_2.objects.all()
-        ]
 
-        Registered_Participant.objects.bulk_create(objects)
+        # 2. Hackathon Team Members from Hackathon Phase 2
+        h2_qs = HackathonTeam_Phase02.objects.prefetch_related('members').all()
+        if h2_qs.filter(is_payment_confirmed=True).exists():
+            h2_qs = h2_qs.filter(is_payment_confirmed=True)
 
-        return True
+        for team in h2_qs:
+            for member in team.members.all().order_by('member_order'):
+                m_email = (member.email or '').strip().lower()
+                if m_email and m_email in existing_emails:
+                    continue
+
+                role_label = f"Hackathon - {team.team_name} ({'Leader' if member.is_leader else f'Member {member.member_order}'})"
+                unique_code = Core.generate_unique_code(member.full_name, member.university or 'University')
+                while unique_code in existing_codes:
+                    unique_code = Core.generate_unique_code(member.full_name, member.university or 'University')
+                existing_codes.add(unique_code)
+
+                if m_email:
+                    existing_emails.add(m_email)
+
+                objects.append(
+                    Registered_Participant(
+                        name=member.full_name,
+                        university=member.university,
+                        contact_no=member.phone_number,
+                        email=member.email,
+                        role=role_label,
+                        t_shirt_size=member.tshirt_size,
+                        unique_code=unique_code,
+                    )
+                )
+
+        if objects:
+            Registered_Participant.objects.bulk_create(objects)
+            try:
+                from core.qrgenerator import generate_qr
+                generate_qr()
+            except Exception as e:
+                print(f"QR generation notice: {e}")
+
+        return len(objects)
         

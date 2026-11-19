@@ -222,11 +222,11 @@ def gen(request):
 @login_required
 def import_reg_participants(request):
 
-    if(Site_Permissions.is_superuser(request.user)):
-        Core.import_participants_from_reg()
-        return JsonResponse({'message':'success'})
+    if Site_Permissions.is_superuser(request.user) or request.user.is_staff or Site_Permissions.user_has_permission(request.user, 'reg_form_control'):
+        count = Core.import_participants_from_reg()
+        return JsonResponse({'message': 'success', 'imported_count': count})
     else:
-        return render(request,'404.html')
+        return render(request, '404.html')
     
 @login_required
 def set_db_increment_counter(request):

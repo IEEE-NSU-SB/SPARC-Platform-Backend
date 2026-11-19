@@ -121,17 +121,27 @@ def send_email(request):
         message = MIMEMultipart()
         message["From"] = "IEEE NSU SB Portal <ieeensusb.portal@gmail.com>"
         message["To"] = data['emailAddr']
-        message["Subject"] = "QR Code for PowerExpress 2.0"
+        message["Subject"] = "QR Code for SPARC 2026"
         message.attach(MIMEText(f'''Dear Participant,
                                 
-Your QR code for PowerExpress 2.0 event is attached in this email.
+Your QR code for SPARC 2026 event is attached in this email.
 This QR code is essential to collect your food and goodies.
                                 
 Best regards,
                                 
 IEEE NSU SB.''', 'plain'))
         
-        content_file = open(f"Participant Files/Participant_QR/{data['participant_id']}.png", "rb")
+        qr_file_path = f"Participant Files/Participant_QR/{data['participant_id']}.png"
+        if not os.path.exists(qr_file_path):
+            os.makedirs("Participant Files/Participant_QR", exist_ok=True)
+            from core.models import Registered_Participant
+            import qrcode
+            p_obj = Registered_Participant.objects.filter(id=data['participant_id']).first()
+            if p_obj:
+                img = qrcode.make(json.dumps({"unqc": p_obj.unique_code}))
+                img.save(qr_file_path)
+
+        content_file = open(qr_file_path, "rb")
         part = MIMEBase('application', 'octet-stream')
         part.set_payload(content_file.read())
         encoders.encode_base64(part)
