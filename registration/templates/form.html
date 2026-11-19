@@ -215,6 +215,7 @@
       </div>
     </div>
 
+    {% if is_staff_view or has_perm.reg_form_control or has_perm.view_reg_responses_list or user.is_staff or user.is_superuser %}
     <!-- Small Thin Phase 1 Navigation Tab (Participants vs Hackathon) -->
     <div class="w-11/12 md:w-3/5 mx-auto -mt-2 mb-3">
       <div class="inline-flex p-1 rounded-lg bg-[#002855]/70 backdrop-blur-md border border-white/30 shadow-[0_2px_8px_rgba(0,0,0,0.25)] text-sm">
@@ -232,6 +233,7 @@
         </a>
       </div>
     </div>
+    {% endif %}
     {% if has_perm.reg_form_control %}
     <!-- admin feature part  -->
     <!-- Button Header -->

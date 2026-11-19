@@ -175,6 +175,7 @@
       </div>
     </div>
 
+    {% if is_staff_view or has_perm.reg_form_control or has_perm.view_reg_responses_list or user.is_staff or user.is_superuser %}
     <!-- Small Thin Phase 1 Navigation Tab (Participants vs Hackathon) -->
     <div class="w-11/12 md:w-3/5 mx-auto -mt-2 mb-3">
       <div class="inline-flex p-1 rounded-lg bg-[#002855]/70 backdrop-blur-md border border-white/30 shadow-[0_2px_8px_rgba(0,0,0,0.25)] text-sm">
@@ -192,6 +193,7 @@
         </a>
       </div>
     </div>
+    {% endif %}
 
     {% if has_perm.reg_form_control %}
     <!-- Admin Feature Header Toolbar (matching form.html) -->
@@ -448,7 +450,7 @@
               </div>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-5">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-5">
               <div>
                 <label class="input_label">Current Year / Semester <span class="text-red-700 ml-1">*</span></label>
                 <select id="m1_academic_year" class="input" required>
@@ -461,16 +463,6 @@
               <div>
                 <label class="input_label">Student ID <span class="text-red-700 ml-1">*</span></label>
                 <input type="text" id="m1_student_id" class="input" placeholder="Used to verify student status" required />
-              </div>
-              <div>
-                <label class="input_label">T-Shirt Size <span class="text-red-700 ml-1">*</span></label>
-                <select id="m1_tshirt_size" class="input" required>
-                  <option value="S">S</option>
-                  <option value="M" selected>M</option>
-                  <option value="L">L</option>
-                  <option value="XL">XL</option>
-                  <option value="XXL">XXL</option>
-                </select>
               </div>
             </div>
 
@@ -557,7 +549,7 @@
               </div>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-5">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-5">
               <div>
                 <label class="input_label">Current Year / Semester <span class="text-red-700 ml-1">*</span></label>
                 <select id="m2_academic_year" class="input" required>
@@ -570,16 +562,6 @@
               <div>
                 <label class="input_label">Student ID <span class="text-red-700 ml-1">*</span></label>
                 <input type="text" id="m2_student_id" class="input" placeholder="Used to verify student status" required />
-              </div>
-              <div>
-                <label class="input_label">T-Shirt Size <span class="text-red-700 ml-1">*</span></label>
-                <select id="m2_tshirt_size" class="input" required>
-                  <option value="S">S</option>
-                  <option value="M" selected>M</option>
-                  <option value="L">L</option>
-                  <option value="XL">XL</option>
-                  <option value="XXL">XXL</option>
-                </select>
               </div>
             </div>
 
@@ -666,7 +648,7 @@
               </div>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-5">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-5">
               <div>
                 <label class="input_label">Current Year / Semester <span class="text-red-700 ml-1">*</span></label>
                 <select id="m3_academic_year" class="input">
@@ -679,16 +661,6 @@
               <div>
                 <label class="input_label">Student ID <span class="text-red-700 ml-1">*</span></label>
                 <input type="text" id="m3_student_id" class="input" placeholder="Used to verify student status" />
-              </div>
-              <div>
-                <label class="input_label">T-Shirt Size <span class="text-red-700 ml-1">*</span></label>
-                <select id="m3_tshirt_size" class="input">
-                  <option value="S">S</option>
-                  <option value="M" selected>M</option>
-                  <option value="L">L</option>
-                  <option value="XL">XL</option>
-                  <option value="XXL">XXL</option>
-                </select>
               </div>
             </div>
 
@@ -1146,7 +1118,6 @@
             academic_year: document.getElementById(`m${num}_academic_year`).value,
             student_id: document.getElementById(`m${num}_student_id`).value.trim(),
             gender: document.getElementById(`m${num}_gender`).value || null,
-            tshirt_size: document.getElementById(`m${num}_tshirt_size`).value,
             is_ieee_member: isIeee,
             ieee_membership_no: isIeee ? document.getElementById(`m${num}_ieee_no`).value.trim() : "",
             ieee_membership_grade: isIeee ? document.getElementById(`m${num}_ieee_grade`).value : "",
