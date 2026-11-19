@@ -214,6 +214,24 @@
         {% endif %}
       </div>
     </div>
+
+    <!-- Small Thin Phase 1 Navigation Tab (Participants vs Hackathon) -->
+    <div class="w-11/12 md:w-3/5 mx-auto -mt-2 mb-3">
+      <div class="inline-flex p-1 rounded-lg bg-[#002855]/70 backdrop-blur-md border border-white/30 shadow-[0_2px_8px_rgba(0,0,0,0.25)] text-sm">
+        <a
+          href="{% if is_staff_view %}{% url 'registration:registration_admin_phase01' %}{% else %}{% url 'registration:registration_form_phase01' %}{% endif %}"
+          class="px-5 py-1.5 rounded-md font-semibold transition-all duration-200 bg-[#00629B] text-white shadow-sm"
+        >
+          Participants
+        </a>
+        <a
+          href="{% if is_staff_view %}{% url 'hackathon:admin_phase01' %}{% else %}{% url 'hackathon:form_phase01' %}{% endif %}"
+          class="px-5 py-1.5 rounded-md font-semibold transition-all duration-200 text-white/80 hover:text-white hover:bg-white/10"
+        >
+          Hackathon
+        </a>
+      </div>
+    </div>
     {% if has_perm.reg_form_control %}
     <!-- admin feature part  -->
     <!-- Button Header -->

@@ -5,740 +5,1223 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>SPARC 2026 | IS AI COOKED? Team Registration</title>
-    <link rel="icon" href="{% static 'img/logo.gif' %}" />
-
-    <!-- Tailwind CSS (same CDN version used in response_table.html) -->
-    <script src="https://cdn.tailwindcss.com/3.4.17"></script>
-
-    <!-- Particles & Hackathon Form Styles -->
+    <link rel="icon" href="{% static '/img/logo.gif' %}" />
+    <!--daisy ui-->
+    <link
+      href="https://cdn.jsdelivr.net/npm/daisyui@5"
+      rel="stylesheet"
+      type="text/css"
+    />
+    <!--tailwind-->
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <!-- sweet alert  -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <!--particles.js-->
     <script src="{% static 'js/particles.min.js' %}"></script>
-    <link rel="stylesheet" href="{% static 'css/hackathon_form.css' %}" />
+
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Instrument+Sans:ital,wght@0,400..700;1,400..700&display=swap');
+
+      body {
+        background: transparent;
+        background-repeat: no-repeat;
+        background-size: cover;
+        position: relative;
+        z-index: 0;
+        font-family: "Instrument Sans", sans-serif;
+      }
+      .response_count {
+        font-size: larger;
+        border-bottom: 2px solid #19508e;
+        border-top: 1px solid #19508e;
+        border-left: 8px solid #19508e;
+        border-right: 1px solid #19508e;
+        padding: 4px 8px;
+        border-radius: 4px;
+        background: #c6e8ff;
+        color: #122812;
+      }
+      .custom-scrollbar::-webkit-scrollbar {
+        width: 5px;
+        height: 12px;
+      }
+      .custom-scrollbar::-webkit-scrollbar-track {
+        background: #a32d2d;
+        border-radius: 8px;
+      }
+      .custom-scrollbar::-webkit-scrollbar-thumb {
+        background: #e53232;
+        border-radius: 9999px;
+        cursor: pointer;
+      }
+      .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+        background: #00629B;
+      }
+      canvas {
+        display: block;
+        vertical-align: bottom;
+      }
+      #particles-js {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        background-color: #002855;
+        z-index: -10;
+        top: 0;
+        left: 0;
+      }
+      .input_label {
+        display: block;
+        font-size: 18px;
+        margin-bottom: 0.35rem;
+        color: #122812;
+        font-weight: 500;
+      }
+      .input {
+        width: 100%;
+        padding: .5rem .75rem;
+        border: 1px solid gray;
+        border-radius: 0.375rem;
+        outline-style: none;
+        transition: all .3s ease-in-out;
+        background: transparent;
+      }
+      .input:focus {
+        border: 1px solid #00629B;
+        box-shadow: 2px 2px 2px #bfdff5;
+      }
+      .continue-btn {
+        color: white;
+        background: #00629B;
+        padding: 0.5rem 1.25rem;
+        border-radius: 0.375rem;
+        cursor: pointer;
+        border: 1px solid #00629B;
+        font-size: 1.1rem;
+        font-weight: 600;
+        transition: all 0.25s ease-in-out;
+      }
+      .continue-btn:hover {
+        background: #d3e4f7;
+        color: #00629B;
+      }
+      .admin-btn {
+        color: white;
+        border: 1px solid #122812;
+        border-radius: 0.325rem;
+        background: #00629B;
+        padding: 0.25rem 0.85rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        font-size: 1.25rem;
+        transition: all 0.3s ease-in-out;
+        justify-content: center;
+      }
+      .admin-btn:hover {
+        background: #d3e4f7;
+        color: #00629B;
+      }
+      .back-btn {
+        color: #122812;
+        border-radius: 1rem;
+        cursor: pointer;
+        font-size: 1.25rem;
+        margin-top: .75rem;
+        font-weight: 600;
+      }
+      .back-btn:hover {
+        color: #00629B;
+      }
+      .section_heading {
+        text-align: center;
+        font-size: 1.5rem;
+        margin-bottom: 22px;
+        font-weight: 700;
+        color: #122812;
+      }
+      .sub_card {
+        background: rgba(255, 255, 255, 0.45);
+        border: 1px solid rgba(255, 255, 255, 0.6);
+        border-radius: 6px;
+        padding: 18px;
+        margin-bottom: 20px;
+        box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+      }
+      @media screen and (max-width: 500px) {
+        .response_count {
+          margin: 12px auto;
+        }
+        .admin-btn {
+          width: 100%;
+          font-size: 1rem;
+        }
+      }
+    </style>
   </head>
 
-  <body class="min-h-screen py-8 px-4">
-    <div id="particles-js"></div>
+  <body class="py-2 custom-scrollbar min-h-screen">
+    <!--Particles JS-->
+    <div id="particles-js" class="fixed inset-0 -z-10"></div>
 
-    <div
-      id="hackathonFormRoot"
-      class="relative z-10 w-full max-w-4xl mx-auto"
-      data-submit-url="{% url 'hackathon:submit_phase01' %}"
-      data-toggle-publish-url="{% url 'hackathon:toggle_publish_phase01' %}"
-      data-csrf-token="{{ csrf_token }}"
-      data-is-staff="{{ is_staff_view|yesno:'true,false' }}"
-    >
-      <!-- Top Brand Header -->
-      <div class="flex flex-col items-center text-center mb-6">
+    <!-- Top Banner Image -->
+    <div class="w-11/12 md:w-3/5 mx-auto my-4">
+      <div class="rounded overflow-hidden shadow-[0px_0px_10px_#00629B] border-1 border-white flex justify-center max-md:h-40">
+        {% if not is_staff_view and not is_published and not registration_closed %}
         <img
-          src="{% static 'img/SPAC25Logo.png' %}"
-          alt="IEEE NSU Student Branch Logo"
-          class="h-16 md:h-20 object-contain mb-3"
-        />
-        <span
-          class="px-6 py-2 text-white bg-[#002855] border-2 border-white text-lg md:text-2xl font-bold rounded-xl shadow-[2px_4px_0_0_#fff]"
-        >
-          Phase 01 Registration
-        </span>
-      </div>
-
-      <!-- Inline Standalone URL-Backed Phase 1 Form Tabs -->
-      <nav class="sparc-form-tab-bar" aria-label="Phase 1 Registration Forms">
-        <div class="sparc-form-tab-list">
-          <a
-            href="{% if is_staff_view %}{% url 'registration:registration_admin_phase01' %}{% else %}{% url 'registration:registration_form_phase01' %}{% endif %}"
-            class="sparc-form-tab-link"
-          >
-            <span>Participants</span>
-            <span class="sparc-form-tab-badge">Conference</span>
-          </a>
-
-          <a
-            href="{% if is_staff_view %}{% url 'hackathon:admin_phase01' %}{% else %}{% url 'hackathon:form_phase01' %}{% endif %}"
-            class="sparc-form-tab-link is-active"
-            aria-current="page"
-          >
-            <span>Hackathon</span>
-            <span class="sparc-form-tab-badge">IS AI COOKED?</span>
-          </a>
-
-          {% comment %}
-            Teammate Slot: Uncomment when Ambassadors Phase 1 form routes are added.
-            <a
-              href="{% if is_staff_view %}{% url 'ambassadors:admin_phase01' %}{% else %}{% url 'ambassadors:form_phase01' %}{% endif %}"
-              class="sparc-form-tab-link"
-            >
-              <span>Ambassadors</span>
-              <span class="sparc-form-tab-badge">Campus Rep</span>
-            </a>
-          {% endcomment %}
-        </div>
-      </nav>
-
-      <!-- Staff-Only Control Bar (Preview Mode + Independent Publish Toggle) -->
-      {% if is_staff_view %}
-      <div class="staff-toolbar">
-        <div class="flex flex-wrap items-center justify-between gap-3">
-          <div class="flex flex-wrap items-center gap-3">
-            <a href="{% url 'registration:reg_landing' %}" class="btn-nav text-sm">
-              &larr; Back to Hub
-            </a>
-            <div class="text-sm font-medium bg-white/10 px-3 py-1.5 rounded-lg border border-white/20">
-              Registered:
-              <strong class="text-sky-200">{{ registration_count|default:0 }} teams</strong>
-              &bull;
-              <strong class="text-sky-200">{{ people_count|default:0 }} people</strong>
-            </div>
-          </div>
-
-          <div class="flex flex-wrap items-center gap-2.5">
-            <button
-              type="button"
-              id="publishToggleBtn"
-              class="publish-toggle-btn {% if is_published %}is-live{% else %}is-closed{% endif %}"
-            >
-              <span id="publishStatusDot" class="inline-block w-2.5 h-2.5 rounded-full bg-white"></span>
-              <span id="publishToggleText">
-                {% if is_published %}Form Published (Click to Close){% else %}Form Unpublished (Click to Open){% endif %}
-              </span>
-            </button>
-
-            {% if has_perm.view_reg_responses_list %}
-            <a href="{% url 'hackathon:response_table_phase01' %}" class="btn-nav text-sm">
-              Responses
-            </a>
-            {% endif %}
-
-            {% if has_perm.reg_form_control %}
-            <a href="{% url 'hackathon:download_excel_phase01' %}" class="btn-excel text-sm">
-              Download Excel
-            </a>
-            {% endif %}
-
-            <a href="{% url 'core:logout' %}" class="btn-logout text-sm">
-              Logout
-            </a>
-          </div>
-        </div>
-        <p class="mt-2.5 text-xs text-slate-200">
-          Admin Preview Mode: You can view and test-submit the Hackathon Phase 1 form regardless of publish state.
-          Toggling publish here affects only the Hackathon Phase 1 form.
-        </p>
-      </div>
-      {% endif %}
-
-      <!-- Public Closed / Full State -->
-      {% if not is_staff_view and not is_published or not is_staff_view and registration_closed %}
-      <div class="form-shell p-8 md:p-12 text-center">
-        <img
-          src="{% static 'img/closed.png' %}"
+          src="{% static '/img/closed.png' %}"
           alt="Registration Closed"
-          class="w-48 md:w-64 mx-auto mb-6 object-contain"
+          class="object-cover md:h-auto"
         />
-        <h1 class="text-2xl md:text-3xl font-bold text-[#002855] mb-3">
-          IS AI COOKED? Registration Is Currently Closed
-        </h1>
-        <p class="text-slate-600 max-w-lg mx-auto mb-6">
-          Hackathon Phase 1 team registration is not accepting responses right now.
-          If you are looking for Conference Participant registration, use the tabs above to switch forms.
-        </p>
-      </div>
-      {% else %}
-
-      <!-- Active Form Shell -->
-      <div class="form-shell">
-        <!-- Event Banner Header -->
-        <div class="bg-[#1b395c] text-white px-6 py-7 md:px-8">
-          <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
-            <span class="text-xs font-bold uppercase tracking-wider px-3 py-1 rounded-full bg-[#00629B] text-white">
-              2-Day AI Stress-Testing Challenge
-            </span>
-            <span class="text-xs text-sky-200 font-medium">
-              Teams of 2 or 3 &bull; IEEE Membership Optional
-            </span>
-          </div>
-          <h1 class="text-2xl md:text-3xl font-bold tracking-tight">
-            IS AI COOKED? Team Registration
-          </h1>
-          <div class="mt-4 p-4 rounded-xl bg-white/10 border border-white/20 text-sm text-slate-100 space-y-1.5">
-            <p><strong>Format &amp; Eligibility:</strong> Open to all currently enrolled university students. Teams must have 2 or 3 members (no solo entries). The secret challenge is revealed on Day 1.</p>
-            <p><strong>Submission Rules:</strong> Fill out this form <strong>once per team</strong> by the Team Leader. Team composition is final upon submission and cannot be modified afterward. IEEE membership is not required to participate.</p>
-          </div>
-        </div>
-
-        <!-- Global Feedback Banner -->
-        <div id="globalErrorBanner" class="hidden-section mx-6 md:mx-8 mt-6 p-4 rounded-xl bg-red-50 border border-red-300 text-red-800 text-sm font-medium"></div>
-
-        <!-- Success Confirmation Panel (Shown after 201 Created) -->
-        <div id="successPanel" class="hidden-section p-8 md:p-12 text-center">
-          <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-green-100 text-green-700 flex items-center justify-center text-3xl font-bold">
-            &#10003;
-          </div>
-          <h2 class="text-2xl font-bold text-[#002855] mb-2">Team Registered Successfully!</h2>
-          <p id="successMessageText" class="text-slate-700 max-w-xl mx-auto mb-6"></p>
-          <button
-            type="button"
-            id="registerAnotherBtn"
-            class="px-6 py-2.5 rounded-lg bg-[#1b395c] hover:bg-[#00629B] text-white font-semibold transition-all"
-          >
-            Submit Another Team
-          </button>
-        </div>
-
-        <!-- Main Registration Form -->
-        <form id="hackathonPhase01Form" class="p-6 md:p-8 space-y-8" novalidate>
-          <!-- ========================================================== -->
-          <!-- SECTION 1: TEAM DETAILS                                     -->
-          <!-- ========================================================== -->
-          <section class="section-card">
-            <div class="border-b border-slate-200 pb-3 mb-5">
-              <h2 class="text-lg font-bold text-[#002855]">Section 1: Team Details</h2>
-              <p class="text-xs text-slate-500 mt-0.5">
-                Primary contact and team configuration. Only the Team Leader should submit this form.
-              </p>
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-              <div>
-                <label for="team_name" class="field-label">
-                  Team Name <span class="required-star">*</span>
-                </label>
-                <input
-                  type="text"
-                  id="team_name"
-                  name="team_name"
-                  class="field-input"
-                  placeholder="e.g., NSU_TechTitans"
-                  required
-                />
-                <p class="text-xs text-slate-500 mt-1">
-                  Format: <code>InstitutionShortName_UniqueName</code> (letters/numbers with exactly one underscore).
-                </p>
-                <p class="field-error" data-error-for="team_name"></p>
-              </div>
-
-              <div>
-                <label for="team_size" class="field-label">
-                  Number of Team Members <span class="required-star">*</span>
-                </label>
-                <select id="team_size" name="team_size" class="field-select" required>
-                  <option value="">-- Select team size --</option>
-                  <option value="2">2 Members (Leader + Member 2)</option>
-                  <option value="3">3 Members (Leader + Member 2 + Member 3)</option>
-                </select>
-                <p class="text-xs text-slate-500 mt-1">
-                  Selecting 3 reveals the Member 3 details section below.
-                </p>
-                <p class="field-error" data-error-for="team_size"></p>
-              </div>
-
-              <div class="md:col-span-2">
-                <span class="field-label">
-                  University Distribution <span class="required-star">*</span>
-                </span>
-                <div class="flex flex-wrap gap-6 mt-2">
-                  <label class="inline-flex items-center gap-2 text-sm text-slate-700 cursor-pointer">
-                    <input type="radio" name="university_distribution" value="single" class="w-4 h-4 accent-[#002855]" required />
-                    <span>One university</span>
-                  </label>
-                  <label class="inline-flex items-center gap-2 text-sm text-slate-700 cursor-pointer">
-                    <input type="radio" name="university_distribution" value="multiple" class="w-4 h-4 accent-[#002855]" required />
-                    <span>More than one university</span>
-                  </label>
-                </div>
-                <p class="field-error" data-error-for="university_distribution"></p>
-              </div>
-
-              <div>
-                <label for="leader_email" class="field-label">
-                  Team Leader's Email <span class="required-star">*</span>
-                </label>
-                <input
-                  type="email"
-                  id="leader_email"
-                  name="leader_email"
-                  class="field-input"
-                  placeholder="leader@university.edu"
-                  required
-                />
-                <p class="text-xs text-slate-500 mt-1">
-                  Primary contact for all updates and Phase 2 notifications.
-                </p>
-                <p class="field-error" data-error-for="leader_email"></p>
-              </div>
-
-              <div>
-                <label for="leader_phone" class="field-label">
-                  Team Leader's WhatsApp / Phone <span class="required-star">*</span>
-                </label>
-                <input
-                  type="text"
-                  id="leader_phone"
-                  name="leader_phone"
-                  class="field-input"
-                  placeholder="01XXXXXXXXX"
-                  maxlength="15"
-                  required
-                />
-                <p class="text-xs text-slate-500 mt-1">
-                  11 digits starting with <code>01</code> (Bangladesh standard format).
-                </p>
-                <p class="field-error" data-error-for="leader_phone"></p>
-              </div>
-            </div>
-          </section>
-
-          <!-- ========================================================== -->
-          <!-- SECTIONS 2 & 3: PARTICIPANT DETAILS (+ CONDITIONAL IEEE)    -->
-          <!-- ========================================================== -->
-          <section class="section-card space-y-6">
-            <div class="border-b border-slate-200 pb-3">
-              <h2 class="text-lg font-bold text-[#002855]">Sections 2 &amp; 3: Participant &amp; IEEE Membership Details</h2>
-              <p class="text-xs text-slate-500 mt-0.5">
-                Enter accurate Student ID details for each member. If a member selects "Yes" for IEEE membership, Section 3 fields appear for that person.
-              </p>
-            </div>
-
-            <!-- MEMBER 1: TEAM LEADER -->
-            <div class="member-card" id="member-card-1" data-member-index="1">
-              <div class="flex items-center justify-between border-b border-slate-200 pb-2.5 mb-4">
-                <h3 class="text-base font-bold text-[#1b395c]">Member 1 — Team Leader</h3>
-                <span class="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-blue-100 text-[#1b395c]">Required</span>
-              </div>
-
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label for="member_1_full_name" class="field-label">Full Name (As per Student ID) <span class="required-star">*</span></label>
-                  <input type="text" id="member_1_full_name" class="field-input" data-field="full_name" data-required="true" required />
-                  <p class="field-error" data-error-for="member_1_full_name"></p>
-                </div>
-
-                <div>
-                  <label for="member_1_email" class="field-label">Email Address (Synced with Section 1) <span class="required-star">*</span></label>
-                  <input type="email" id="member_1_email" class="field-input" data-field="email" readonly placeholder="Auto-filled from Team Leader's Email" />
-                  <p class="field-error" data-error-for="member_1_email"></p>
-                </div>
-
-                <div>
-                  <label for="member_1_phone_number" class="field-label">Phone / WhatsApp (Synced with Section 1) <span class="required-star">*</span></label>
-                  <input type="text" id="member_1_phone_number" class="field-input" data-field="phone_number" readonly placeholder="Auto-filled from Team Leader's Phone" />
-                  <p class="field-error" data-error-for="member_1_phone_number"></p>
-                </div>
-
-                <div>
-                  <label for="member_1_university" class="field-label">University <span class="required-star">*</span></label>
-                  <input type="text" id="member_1_university" class="field-input" data-field="university" placeholder="e.g., North South University" data-required="true" required />
-                  <p class="field-error" data-error-for="member_1_university"></p>
-                </div>
-
-                <div>
-                  <label for="member_1_department" class="field-label">Department <span class="required-star">*</span></label>
-                  <input type="text" id="member_1_department" class="field-input" data-field="department" placeholder="e.g., CSE / EEE" data-required="true" required />
-                  <p class="field-error" data-error-for="member_1_department"></p>
-                </div>
-
-                <div>
-                  <label for="member_1_academic_year" class="field-label">Current Year / Semester <span class="required-star">*</span></label>
-                  <select id="member_1_academic_year" class="field-select" data-field="academic_year" data-required="true" required>
-                    <option value="">-- Select year --</option>
-                    <option value="1st">1st year</option>
-                    <option value="2nd">2nd year</option>
-                    <option value="3rd">3rd year</option>
-                    <option value="4th">4th year</option>
-                  </select>
-                  <p class="field-error" data-error-for="member_1_academic_year"></p>
-                </div>
-
-                <div>
-                  <label for="member_1_student_id" class="field-label">Student ID <span class="required-star">*</span></label>
-                  <input type="text" id="member_1_student_id" class="field-input" data-field="student_id" data-required="true" required />
-                  <p class="field-error" data-error-for="member_1_student_id"></p>
-                </div>
-
-                <div>
-                  <label for="member_1_gender" class="field-label">Gender <span class="text-slate-400 font-normal">(Optional)</span></label>
-                  <select id="member_1_gender" class="field-select" data-field="gender">
-                    <option value="">-- Select (Optional) --</option>
-                    <option value="male">Male</option>
-                    <option value="female">Female</option>
-                    <option value="prefer_not_to_say">Prefer not to say</option>
-                  </select>
-                  <p class="field-error" data-error-for="member_1_gender"></p>
-                </div>
-
-                <div class="md:col-span-2 pt-1">
-                  <span class="field-label">Are you an IEEE member? <span class="required-star">*</span></span>
-                  <div class="flex gap-6 mt-1.5">
-                    <label class="inline-flex items-center gap-2 text-sm cursor-pointer">
-                      <input type="radio" name="member_1_is_ieee" value="yes" class="ieee-toggle w-4 h-4 accent-[#002855]" data-member-index="1" required />
-                      <span>Yes</span>
-                    </label>
-                    <label class="inline-flex items-center gap-2 text-sm cursor-pointer">
-                      <input type="radio" name="member_1_is_ieee" value="no" class="ieee-toggle w-4 h-4 accent-[#002855]" data-member-index="1" checked required />
-                      <span>No</span>
-                    </label>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Conditional Section 3 for Member 1 -->
-              <div id="member_1_ieee_section" class="ieee-conditional-box hidden-section">
-                <h4 class="text-sm font-bold text-[#002855] mb-3">Section 3: IEEE Membership Details (Team Leader)</h4>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label for="member_1_ieee_membership_no" class="field-label">IEEE Membership Number (8 digits) <span class="required-star">*</span></label>
-                    <input type="text" id="member_1_ieee_membership_no" class="field-input" data-field="ieee_membership_no" data-ieee-required="true" maxlength="8" placeholder="12345678" />
-                    <p class="field-error" data-error-for="member_1_ieee_membership_no"></p>
-                  </div>
-
-                  <div>
-                    <label for="member_1_ieee_membership_grade" class="field-label">Membership Grade <span class="required-star">*</span></label>
-                    <select id="member_1_ieee_membership_grade" class="field-select" data-field="ieee_membership_grade" data-ieee-required="true">
-                      <option value="">-- Select grade --</option>
-                      <option value="Student Member">Student Member</option>
-                      <option value="Graduate Student Member">Graduate Student Member</option>
-                      <option value="Member">Member</option>
-                      <option value="Other">Other</option>
-                    </select>
-                    <p class="field-error" data-error-for="member_1_ieee_membership_grade"></p>
-                  </div>
-
-                  <div>
-                    <label for="member_1_ieee_student_branch" class="field-label">IEEE Student Branch <span class="required-star">*</span></label>
-                    <input type="text" id="member_1_ieee_student_branch" class="field-input" data-field="ieee_student_branch" data-ieee-required="true" placeholder="e.g., IEEE NSU Student Branch" />
-                    <p class="field-error" data-error-for="member_1_ieee_student_branch"></p>
-                  </div>
-
-                  <div>
-                    <label for="member_1_ieee_volunteer_position" class="field-label">Officer / Volunteer Position <span class="text-slate-400 font-normal">(Optional)</span></label>
-                    <input type="text" id="member_1_ieee_volunteer_position" class="field-input" data-field="ieee_volunteer_position" placeholder="Role and branch if any" />
-                    <p class="field-error" data-error-for="member_1_ieee_volunteer_position"></p>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- MEMBER 2 -->
-            <div class="member-card" id="member-card-2" data-member-index="2">
-              <div class="flex items-center justify-between border-b border-slate-200 pb-2.5 mb-4">
-                <h3 class="text-base font-bold text-[#1b395c]">Member 2</h3>
-                <span class="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-blue-100 text-[#1b395c]">Required</span>
-              </div>
-
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label for="member_2_full_name" class="field-label">Full Name (As per Student ID) <span class="required-star">*</span></label>
-                  <input type="text" id="member_2_full_name" class="field-input" data-field="full_name" data-required="true" required />
-                  <p class="field-error" data-error-for="member_2_full_name"></p>
-                </div>
-
-                <div>
-                  <label for="member_2_email" class="field-label">Email Address <span class="required-star">*</span></label>
-                  <input type="email" id="member_2_email" class="field-input" data-field="email" data-required="true" required />
-                  <p class="field-error" data-error-for="member_2_email"></p>
-                </div>
-
-                <div>
-                  <label for="member_2_phone_number" class="field-label">Phone / WhatsApp Number <span class="required-star">*</span></label>
-                  <input type="text" id="member_2_phone_number" class="field-input" data-field="phone_number" placeholder="01XXXXXXXXX" maxlength="15" data-required="true" required />
-                  <p class="field-error" data-error-for="member_2_phone_number"></p>
-                </div>
-
-                <div>
-                  <label for="member_2_university" class="field-label">University <span class="required-star">*</span></label>
-                  <input type="text" id="member_2_university" class="field-input" data-field="university" data-required="true" required />
-                  <p class="field-error" data-error-for="member_2_university"></p>
-                </div>
-
-                <div>
-                  <label for="member_2_department" class="field-label">Department <span class="required-star">*</span></label>
-                  <input type="text" id="member_2_department" class="field-input" data-field="department" data-required="true" required />
-                  <p class="field-error" data-error-for="member_2_department"></p>
-                </div>
-
-                <div>
-                  <label for="member_2_academic_year" class="field-label">Current Year / Semester <span class="required-star">*</span></label>
-                  <select id="member_2_academic_year" class="field-select" data-field="academic_year" data-required="true" required>
-                    <option value="">-- Select year --</option>
-                    <option value="1st">1st year</option>
-                    <option value="2nd">2nd year</option>
-                    <option value="3rd">3rd year</option>
-                    <option value="4th">4th year</option>
-                  </select>
-                  <p class="field-error" data-error-for="member_2_academic_year"></p>
-                </div>
-
-                <div>
-                  <label for="member_2_student_id" class="field-label">Student ID <span class="required-star">*</span></label>
-                  <input type="text" id="member_2_student_id" class="field-input" data-field="student_id" data-required="true" required />
-                  <p class="field-error" data-error-for="member_2_student_id"></p>
-                </div>
-
-                <div>
-                  <label for="member_2_gender" class="field-label">Gender <span class="text-slate-400 font-normal">(Optional)</span></label>
-                  <select id="member_2_gender" class="field-select" data-field="gender">
-                    <option value="">-- Select (Optional) --</option>
-                    <option value="male">Male</option>
-                    <option value="female">Female</option>
-                    <option value="prefer_not_to_say">Prefer not to say</option>
-                  </select>
-                  <p class="field-error" data-error-for="member_2_gender"></p>
-                </div>
-
-                <div class="md:col-span-2 pt-1">
-                  <span class="field-label">Are you an IEEE member? <span class="required-star">*</span></span>
-                  <div class="flex gap-6 mt-1.5">
-                    <label class="inline-flex items-center gap-2 text-sm cursor-pointer">
-                      <input type="radio" name="member_2_is_ieee" value="yes" class="ieee-toggle w-4 h-4 accent-[#002855]" data-member-index="2" required />
-                      <span>Yes</span>
-                    </label>
-                    <label class="inline-flex items-center gap-2 text-sm cursor-pointer">
-                      <input type="radio" name="member_2_is_ieee" value="no" class="ieee-toggle w-4 h-4 accent-[#002855]" data-member-index="2" checked required />
-                      <span>No</span>
-                    </label>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Conditional Section 3 for Member 2 -->
-              <div id="member_2_ieee_section" class="ieee-conditional-box hidden-section">
-                <h4 class="text-sm font-bold text-[#002855] mb-3">Section 3: IEEE Membership Details (Member 2)</h4>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label for="member_2_ieee_membership_no" class="field-label">IEEE Membership Number (8 digits) <span class="required-star">*</span></label>
-                    <input type="text" id="member_2_ieee_membership_no" class="field-input" data-field="ieee_membership_no" data-ieee-required="true" maxlength="8" placeholder="12345678" />
-                    <p class="field-error" data-error-for="member_2_ieee_membership_no"></p>
-                  </div>
-
-                  <div>
-                    <label for="member_2_ieee_membership_grade" class="field-label">Membership Grade <span class="required-star">*</span></label>
-                    <select id="member_2_ieee_membership_grade" class="field-select" data-field="ieee_membership_grade" data-ieee-required="true">
-                      <option value="">-- Select grade --</option>
-                      <option value="Student Member">Student Member</option>
-                      <option value="Graduate Student Member">Graduate Student Member</option>
-                      <option value="Member">Member</option>
-                      <option value="Other">Other</option>
-                    </select>
-                    <p class="field-error" data-error-for="member_2_ieee_membership_grade"></p>
-                  </div>
-
-                  <div>
-                    <label for="member_2_ieee_student_branch" class="field-label">IEEE Student Branch <span class="required-star">*</span></label>
-                    <input type="text" id="member_2_ieee_student_branch" class="field-input" data-field="ieee_student_branch" data-ieee-required="true" placeholder="e.g., IEEE NSU Student Branch" />
-                    <p class="field-error" data-error-for="member_2_ieee_student_branch"></p>
-                  </div>
-
-                  <div>
-                    <label for="member_2_ieee_volunteer_position" class="field-label">Officer / Volunteer Position <span class="text-slate-400 font-normal">(Optional)</span></label>
-                    <input type="text" id="member_2_ieee_volunteer_position" class="field-input" data-field="ieee_volunteer_position" placeholder="Role and branch if any" />
-                    <p class="field-error" data-error-for="member_2_ieee_volunteer_position"></p>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- MEMBER 3 (Conditionally Shown Only When Team Size = 3) -->
-            <div class="member-card hidden-section" id="member-card-3" data-member-index="3">
-              <div class="flex items-center justify-between border-b border-slate-200 pb-2.5 mb-4">
-                <h3 class="text-base font-bold text-[#1b395c]">Member 3</h3>
-                <span class="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-indigo-100 text-indigo-800">3-Member Team</span>
-              </div>
-
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label for="member_3_full_name" class="field-label">Full Name (As per Student ID) <span class="required-star">*</span></label>
-                  <input type="text" id="member_3_full_name" class="field-input" data-field="full_name" data-required="true" />
-                  <p class="field-error" data-error-for="member_3_full_name"></p>
-                </div>
-
-                <div>
-                  <label for="member_3_email" class="field-label">Email Address <span class="required-star">*</span></label>
-                  <input type="email" id="member_3_email" class="field-input" data-field="email" data-required="true" />
-                  <p class="field-error" data-error-for="member_3_email"></p>
-                </div>
-
-                <div>
-                  <label for="member_3_phone_number" class="field-label">Phone / WhatsApp Number <span class="required-star">*</span></label>
-                  <input type="text" id="member_3_phone_number" class="field-input" data-field="phone_number" placeholder="01XXXXXXXXX" maxlength="15" data-required="true" />
-                  <p class="field-error" data-error-for="member_3_phone_number"></p>
-                </div>
-
-                <div>
-                  <label for="member_3_university" class="field-label">University <span class="required-star">*</span></label>
-                  <input type="text" id="member_3_university" class="field-input" data-field="university" data-required="true" />
-                  <p class="field-error" data-error-for="member_3_university"></p>
-                </div>
-
-                <div>
-                  <label for="member_3_department" class="field-label">Department <span class="required-star">*</span></label>
-                  <input type="text" id="member_3_department" class="field-input" data-field="department" data-required="true" />
-                  <p class="field-error" data-error-for="member_3_department"></p>
-                </div>
-
-                <div>
-                  <label for="member_3_academic_year" class="field-label">Current Year / Semester <span class="required-star">*</span></label>
-                  <select id="member_3_academic_year" class="field-select" data-field="academic_year" data-required="true">
-                    <option value="">-- Select year --</option>
-                    <option value="1st">1st year</option>
-                    <option value="2nd">2nd year</option>
-                    <option value="3rd">3rd year</option>
-                    <option value="4th">4th year</option>
-                  </select>
-                  <p class="field-error" data-error-for="member_3_academic_year"></p>
-                </div>
-
-                <div>
-                  <label for="member_3_student_id" class="field-label">Student ID <span class="required-star">*</span></label>
-                  <input type="text" id="member_3_student_id" class="field-input" data-field="student_id" data-required="true" />
-                  <p class="field-error" data-error-for="member_3_student_id"></p>
-                </div>
-
-                <div>
-                  <label for="member_3_gender" class="field-label">Gender <span class="text-slate-400 font-normal">(Optional)</span></label>
-                  <select id="member_3_gender" class="field-select" data-field="gender">
-                    <option value="">-- Select (Optional) --</option>
-                    <option value="male">Male</option>
-                    <option value="female">Female</option>
-                    <option value="prefer_not_to_say">Prefer not to say</option>
-                  </select>
-                  <p class="field-error" data-error-for="member_3_gender"></p>
-                </div>
-
-                <div class="md:col-span-2 pt-1">
-                  <span class="field-label">Are you an IEEE member? <span class="required-star">*</span></span>
-                  <div class="flex gap-6 mt-1.5">
-                    <label class="inline-flex items-center gap-2 text-sm cursor-pointer">
-                      <input type="radio" name="member_3_is_ieee" value="yes" class="ieee-toggle w-4 h-4 accent-[#002855]" data-member-index="3" />
-                      <span>Yes</span>
-                    </label>
-                    <label class="inline-flex items-center gap-2 text-sm cursor-pointer">
-                      <input type="radio" name="member_3_is_ieee" value="no" class="ieee-toggle w-4 h-4 accent-[#002855]" data-member-index="3" checked />
-                      <span>No</span>
-                    </label>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Conditional Section 3 for Member 3 -->
-              <div id="member_3_ieee_section" class="ieee-conditional-box hidden-section">
-                <h4 class="text-sm font-bold text-[#002855] mb-3">Section 3: IEEE Membership Details (Member 3)</h4>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label for="member_3_ieee_membership_no" class="field-label">IEEE Membership Number (8 digits) <span class="required-star">*</span></label>
-                    <input type="text" id="member_3_ieee_membership_no" class="field-input" data-field="ieee_membership_no" data-ieee-required="true" maxlength="8" placeholder="12345678" />
-                    <p class="field-error" data-error-for="member_3_ieee_membership_no"></p>
-                  </div>
-
-                  <div>
-                    <label for="member_3_ieee_membership_grade" class="field-label">Membership Grade <span class="required-star">*</span></label>
-                    <select id="member_3_ieee_membership_grade" class="field-select" data-field="ieee_membership_grade" data-ieee-required="true">
-                      <option value="">-- Select grade --</option>
-                      <option value="Student Member">Student Member</option>
-                      <option value="Graduate Student Member">Graduate Student Member</option>
-                      <option value="Member">Member</option>
-                      <option value="Other">Other</option>
-                    </select>
-                    <p class="field-error" data-error-for="member_3_ieee_membership_grade"></p>
-                  </div>
-
-                  <div>
-                    <label for="member_3_ieee_student_branch" class="field-label">IEEE Student Branch <span class="required-star">*</span></label>
-                    <input type="text" id="member_3_ieee_student_branch" class="field-input" data-field="ieee_student_branch" data-ieee-required="true" placeholder="e.g., IEEE NSU Student Branch" />
-                    <p class="field-error" data-error-for="member_3_ieee_student_branch"></p>
-                  </div>
-
-                  <div>
-                    <label for="member_3_ieee_volunteer_position" class="field-label">Officer / Volunteer Position <span class="text-slate-400 font-normal">(Optional)</span></label>
-                    <input type="text" id="member_3_ieee_volunteer_position" class="field-input" data-field="ieee_volunteer_position" placeholder="Role and branch if any" />
-                    <p class="field-error" data-error-for="member_3_ieee_volunteer_position"></p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </section>
-
-          <!-- ========================================================== -->
-          <!-- SECTION 4: AGREEMENTS AND DECLARATIONS                      -->
-          <!-- ========================================================== -->
-          <section class="section-card">
-            <div class="border-b border-slate-200 pb-3 mb-5">
-              <h2 class="text-lg font-bold text-[#002855]">Section 4: Agreements and Declarations</h2>
-              <p class="text-xs text-slate-500 mt-0.5">
-                All 7 declarations must be confirmed and signed by the Team Leader before submission.
-              </p>
-            </div>
-
-            <div class="space-y-3 text-sm text-slate-700">
-              <label class="flex items-start gap-3 cursor-pointer">
-                <input type="checkbox" id="agree_enrolled_students" class="agreement-checkbox mt-1 w-4 h-4 accent-[#002855]" data-agreement-key="enrolled_students" required />
-                <span>Everyone on my team is a currently enrolled university student.</span>
-              </label>
-
-              <label class="flex items-start gap-3 cursor-pointer">
-                <input type="checkbox" id="agree_member_consent" class="agreement-checkbox mt-1 w-4 h-4 accent-[#002855]" data-agreement-key="member_consent" required />
-                <span>All team members have agreed to take part and the details above are correct.</span>
-              </label>
-
-              <label class="flex items-start gap-3 cursor-pointer">
-                <input type="checkbox" id="agree_composition_final" class="agreement-checkbox mt-1 w-4 h-4 accent-[#002855]" data-agreement-key="composition_final" required />
-                <span>Team composition is final after submission and cannot be changed.</span>
-              </label>
-
-              <label class="flex items-start gap-3 cursor-pointer">
-                <input type="checkbox" id="agree_rules_plagiarism" class="agreement-checkbox mt-1 w-4 h-4 accent-[#002855]" data-agreement-key="rules_plagiarism" required />
-                <span>We will follow the rules: zero tolerance for plagiarism, one submission per team, no extensions.</span>
-              </label>
-
-              <label class="flex items-start gap-3 cursor-pointer">
-                <input type="checkbox" id="agree_originality" class="agreement-checkbox mt-1 w-4 h-4 accent-[#002855]" data-agreement-key="originality" required />
-                <span>We understand that identical or near-identical entries lead to immediate disqualification.</span>
-              </label>
-
-              <label class="flex items-start gap-3 cursor-pointer">
-                <input type="checkbox" id="agree_announcements" class="agreement-checkbox mt-1 w-4 h-4 accent-[#002855]" data-agreement-key="announcements" required />
-                <span>We agree that our names, university and results may be shared for event announcements and results.</span>
-              </label>
-
-              <label class="flex items-start gap-3 cursor-pointer">
-                <input type="checkbox" id="agree_media_permission" class="agreement-checkbox mt-1 w-4 h-4 accent-[#002855]" data-agreement-key="media_permission" required />
-                <span>We give permission for photos and videos taken at the event to be used for publicity.</span>
-              </label>
-            </div>
-            <p class="field-error mt-2" data-error-for="__all__"></p>
-
-            <div class="mt-6 pt-5 border-t border-slate-200">
-              <label for="leader_signature" class="field-label">
-                Team Leader's Signature (Type Full Name) <span class="required-star">*</span>
-              </label>
-              <input
-                type="text"
-                id="leader_signature"
-                name="leader_signature"
-                class="field-input"
-                placeholder="Type Team Leader's full name as digital signature"
-                required
-              />
-              <p class="field-error" data-error-for="leader_signature"></p>
-            </div>
-          </section>
-
-          <!-- Submit Button -->
-          <div class="flex justify-end pt-2">
-            <button
-              type="submit"
-              id="submitHackathonBtn"
-              class="w-full md:w-auto px-8 py-3.5 rounded-xl bg-[#1b395c] hover:bg-[#00629B] text-white font-bold text-base shadow-lg transition-all duration-200 disabled:opacity-60 disabled:cursor-not-allowed"
-            >
-              Submit Team Registration
-            </button>
-          </div>
-        </form>
-      </div>
-      {% endif %}
-
-      <div class="text-center mt-8 text-gray-200 text-sm italic">
-        2026 &copy; IEEE NSU Student Branch
+        {% else %}
+        <img
+          src="{% static '/img/closed.png' %}"
+          alt="Event Banner"
+          class="object-cover md:h-auto"
+        />
+        {% endif %}
       </div>
     </div>
 
-    <script src="{% static 'js/hackathon_form_phase01.js' %}"></script>
+    <!-- Small Thin Phase 1 Navigation Tab (Participants vs Hackathon) -->
+    <div class="w-11/12 md:w-3/5 mx-auto -mt-2 mb-3">
+      <div class="inline-flex p-1 rounded-lg bg-[#002855]/70 backdrop-blur-md border border-white/30 shadow-[0_2px_8px_rgba(0,0,0,0.25)] text-sm">
+        <a
+          href="{% if is_staff_view %}{% url 'registration:registration_admin_phase01' %}{% else %}{% url 'registration:registration_form_phase01' %}{% endif %}"
+          class="px-5 py-1.5 rounded-md font-semibold transition-all duration-200 text-white/80 hover:text-white hover:bg-white/10"
+        >
+          Participants
+        </a>
+        <a
+          href="{% if is_staff_view %}{% url 'hackathon:admin_phase01' %}{% else %}{% url 'hackathon:form_phase01' %}{% endif %}"
+          class="px-5 py-1.5 rounded-md font-semibold transition-all duration-200 bg-[#00629B] text-white shadow-sm"
+        >
+          Hackathon
+        </a>
+      </div>
+    </div>
+
+    {% if has_perm.reg_form_control %}
+    <!-- Admin Feature Header Toolbar -->
+    <div class="rounded">
+      <div
+        class="bg-[#d3e4f7] w-11/12 md:w-3/5 mx-auto px-6 py-5"
+        style="
+          backdrop-filter: blur(7px);
+          border-radius: 4px 4px;
+          box-shadow: 0 2px 6px 0px #00000078;
+          position: relative;
+          top: 14px;"
+      >
+        <div
+          class="flex flex-col sm:flex-row sm:flex-wrap items-center md:justify-between items-start"
+        >
+          <div>
+            <!-- Publish Form Toggle Button (staff only) -->
+            <button
+              id="publishToggle"
+              type="button"
+              class="inline-flex gap-2 px-0 py-2.5 rounded-md font-medium text-lg cursor-pointer"
+            >
+              <input
+                id="publishCheckbox"
+                type="checkbox"
+                {% if is_published %} checked="checked" {% endif %}
+                class="toggle border-gray-300 bg-gray-400 checked:border-[#00629B] checked:bg-[#D7F5BF] checked:text-[#00629B]"
+              />
+              {% if is_published %}
+              <span class="text-xl" style="color: #00629B" id="publishText">Form published!</span>
+              {% else %}
+              <span class="text-xl" style="color: rgb(207, 25, 18)" id="publishText">Publish Form?</span>
+              {% endif %}
+            </button>
+          </div>
+          <p class="response_count">
+            Response Count:
+            <span style="font-weight: bold">{{registration_count}}</span> teams ({{people_count}} people)
+          </p>
+        </div>
+
+        <div
+          class="flex flex-col sm:flex-row gap-3 items-center justify-center sm:justify-center w-full sm:w-auto my-3"
+        >
+          <!-- Download Excel Button (staff only) -->
+          <a
+            href="{% url 'hackathon:download_excel_phase01' %}"
+            class="admin-btn"
+          >
+            <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24">
+              <path
+                d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z"
+              />
+            </svg>
+            <span>Download Excel Sheet</span>
+          </a>
+
+          {% if has_perm.view_qr_dashboard %}
+          <a
+            href="{% url 'registration:reg_landing' %}"
+            class="admin-btn"
+          >
+            <span>System Dashboard</span>
+          </a>
+          {% endif %}
+
+          {% if has_perm.view_reg_responses_list %}
+          <!-- See Responses Button (staff only) -->
+          <a
+            href="{% url 'hackathon:response_table_phase01' %}"
+            class="admin-btn"
+          >
+            <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24">
+              <path
+                d="M19,3H5C3.89,3 3,3.89 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V5C21,3.89 20.1,3 19,3M19,19H5V5H19V19M17,17H7V15H17V17M17,13H7V11H17V13M17,9H7V7H17V9Z"
+              />
+            </svg>
+            <span>See Responses</span>
+          </a>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- Form Glassmorphism Container -->
+    <div
+      class="bg-[#d3e4f7] w-11/12 md:w-3/5 mx-auto"
+      style="
+        backdrop-filter: blur(7px);
+        border-radius: 4px 4px;
+        box-shadow: 0 2px 6px 0px #00000078;
+      "
+    >
+      {% if not is_staff_view and not is_published and not registration_closed %}
+      <div
+        class="p-6 bg-yellow-50 border border-yellow-300 rounded text-yellow-900 text-center"
+        style="margin-top:18px"
+      >
+        <p class="text-lg font-semibold">
+          Registration is currently closed.
+        </p>
+        <p class="mt-2 text-sm">
+          For any queries, contact - <a href="mailto:ieeensusb.portal@gmail.com" style="color:#0b5ed7;text-decoration:none;">ieeensusb.portal@gmail.com</a>
+        </p>
+      </div>
+      {% elif not is_staff_view and registration_closed %}
+      <div
+        class="p-6 bg-red-50 border border-red-300 rounded text-red-900 text-center"
+        style="margin-top:18px"
+      >
+        Registration is closed as we have reached the maximum number of teams.
+      </div>
+      {% else %}
+
+      <!-- Step Indicator Header -->
+      <div class="flex justify-between px-6 pt-6 pb-2 border-b border-[#00629B]/20 text-sm font-semibold">
+        <div id="step1Indicator" class="text-[#00629B] border-b-2 border-[#00629B] pb-1 cursor-pointer">1. Team Details</div>
+        <div id="step2Indicator" class="text-gray-500 pb-1 cursor-pointer">2. Participant Details</div>
+        <div id="step3Indicator" class="text-gray-500 pb-1 cursor-pointer">3. Agreements</div>
+      </div>
+
+      <!-- Form Wrapper -->
+      <form id="hackathonRegistrationForm" method="post" class="p-6">
+        {% csrf_token %}
+
+        <!-- STEP 1: TEAM DETAILS -->
+        <section id="step1" class="shadow-md p-5 font-medium rounded-md">
+          <h2 class="md:text-3xl text-xl text-center mb-4">
+            Phase 01 - IS AI COOKED? Team Registration
+          </h2>
+          <div class="mb-6 text-sm text-[#122812]/90 leading-relaxed bg-white/40 p-4 rounded border border-white/60">
+            <p class="mb-2">
+              <strong>Think you can outsmart an AI?</strong> Over two days you'll put some of the most advanced AI models under pressure and find out where, and why, they fall short of what people really ask of them. The challenge is a secret until Day 1. There is nothing to prepare. Bring a laptop and a sharp mind.
+            </p>
+            <p class="text-xs text-gray-700">
+              <strong>Rules:</strong> Teams of 2 or 3 (no solo entries). Open to all university students. Only the Team Leader fills in this form, once per team. Team composition is final after you submit. IEEE membership is NOT required.
+            </p>
+          </div>
+
+          <div class="mb-5">
+            <label for="team_name" class="input_label">
+              Team Name <span class="text-red-700 ml-1">*</span>
+            </label>
+            <input
+              type="text"
+              name="team_name"
+              id="team_name"
+              placeholder="e.g. NSU_TechTitans (Format: InstitutionShortName_UniqueName)"
+              class="input"
+              required
+            />
+            <small class="text-xs text-gray-600 block mt-1">Letters and numbers with exactly one underscore.</small>
+          </div>
+
+          <div class="mb-5">
+            <label for="team_size" class="input_label">
+              Number of Team Members <span class="text-red-700 ml-1">*</span>
+            </label>
+            <select name="team_size" id="team_size" class="input" required>
+              <option value="2">2 Members (Team Leader + Member 2)</option>
+              <option value="3">3 Members (Team Leader + Member 2 + Member 3)</option>
+            </select>
+          </div>
+
+          <div class="mb-5">
+            <label class="input_label">
+              Is your team from one university or more than one? <span class="text-red-700 ml-1">*</span>
+            </label>
+            <label class="text-lg mr-6 cursor-pointer">
+              <input type="radio" name="university_distribution" value="single" class="mb-1" checked />
+              One university
+            </label>
+            <label class="text-lg cursor-pointer">
+              <input type="radio" name="university_distribution" value="multiple" class="mb-1" />
+              More than one university
+            </label>
+          </div>
+
+          <div class="mb-5">
+            <label for="leader_email" class="input_label">
+              Team Leader's Email Address <span class="text-red-700 ml-1">*</span>
+            </label>
+            <input
+              type="email"
+              name="leader_email"
+              id="leader_email"
+              placeholder="All updates will be sent to this email"
+              class="input"
+              required
+            />
+          </div>
+
+          <div class="mb-5">
+            <label for="leader_phone" class="input_label">
+              Team Leader's WhatsApp / Phone Number <span class="text-red-700 ml-1">*</span>
+            </label>
+            <input
+              type="text"
+              name="leader_phone"
+              id="leader_phone"
+              placeholder="01XXXXXXXXX (11 digits, starts with 01)"
+              class="input"
+              maxlength="15"
+              required
+            />
+          </div>
+
+          <div class="flex justify-center mt-6">
+            <button onclick="nextStep(1)" class="continue-btn" type="button">
+              Continue &rarr;
+            </button>
+          </div>
+        </section>
+
+        <!-- STEP 2: PARTICIPANT DETAILS -->
+        <section id="step2" class="hidden shadow-md p-5 font-medium rounded-md">
+          <div class="flex items-center justify-between mb-4">
+            <button onclick="prevStep(1)" class="back-btn" type="button">
+              &larr; Back
+            </button>
+          </div>
+
+          <h2 class="section_heading">Participant Details</h2>
+
+          <!-- MEMBER 1: TEAM LEADER -->
+          <div class="sub_card" id="member_card_1">
+            <h3 class="text-xl font-bold mb-4 text-[#00629B] flex items-center justify-between">
+              <span>Member 1 — Team Leader</span>
+              <span class="text-xs bg-[#00629B] text-white px-2.5 py-0.5 rounded">Leader</span>
+            </h3>
+
+            <div class="mb-4">
+              <label class="input_label">Full Name (As on Student ID) <span class="text-red-700 ml-1">*</span></label>
+              <input type="text" id="m1_full_name" class="input" placeholder="Full name as on student ID" required />
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+              <div>
+                <label class="input_label">Email Address <span class="text-red-700 ml-1">*</span></label>
+                <input type="email" id="m1_email" class="input bg-gray-100/60" readonly placeholder="Synced with Team Leader email" />
+              </div>
+              <div>
+                <label class="input_label">Phone / WhatsApp Number <span class="text-red-700 ml-1">*</span></label>
+                <input type="text" id="m1_phone" class="input bg-gray-100/60" readonly placeholder="Synced with Team Leader phone" />
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+              <div>
+                <label class="input_label">University <span class="text-red-700 ml-1">*</span></label>
+                <input type="text" id="m1_university" class="input" placeholder="University name" required />
+              </div>
+              <div>
+                <label class="input_label">Department <span class="text-red-700 ml-1">*</span></label>
+                <input type="text" id="m1_department" class="input" placeholder="e.g. CSE, EEE" required />
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+              <div>
+                <label class="input_label">Current Year / Semester <span class="text-red-700 ml-1">*</span></label>
+                <select id="m1_academic_year" class="input" required>
+                  <option value="1st">1st year</option>
+                  <option value="2nd">2nd year</option>
+                  <option value="3rd">3rd year</option>
+                  <option value="4th">4th year</option>
+                </select>
+              </div>
+              <div>
+                <label class="input_label">Student ID <span class="text-red-700 ml-1">*</span></label>
+                <input type="text" id="m1_student_id" class="input" placeholder="Used to verify student status" required />
+              </div>
+              <div>
+                <label class="input_label">T-Shirt Size <span class="text-red-700 ml-1">*</span></label>
+                <select id="m1_tshirt_size" class="input" required>
+                  <option value="S">S</option>
+                  <option value="M" selected>M</option>
+                  <option value="L">L</option>
+                  <option value="XL">XL</option>
+                  <option value="XXL">XXL</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="mb-4">
+              <label class="input_label">Gender <span class="text-xs text-gray-500 font-normal">(Optional)</span></label>
+              <select id="m1_gender" class="input">
+                <option value="">Prefer not to say</option>
+                <option value="male">Male</option>
+                <option value="female">Female</option>
+                <option value="prefer_not_to_say">Prefer not to say</option>
+              </select>
+            </div>
+
+            <div class="mb-4">
+              <label class="input_label">Are you an IEEE Member? <span class="text-red-700 ml-1">*</span></label>
+              <label class="mr-4 text-base cursor-pointer">
+                <input type="radio" name="m1_is_ieee" value="no" checked onchange="toggleIeee(1)" /> No
+              </label>
+              <label class="text-base cursor-pointer">
+                <input type="radio" name="m1_is_ieee" value="yes" onchange="toggleIeee(1)" /> Yes
+              </label>
+            </div>
+
+            <div id="m1_ieee_box" class="hidden p-4 rounded bg-[#bfdff5]/40 border border-[#00629B]/30 mt-3">
+              <h4 class="font-bold text-sm text-[#00629B] mb-3">Section 3: IEEE Membership Details (Team Leader)</h4>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-3">
+                <div>
+                  <label class="input_label text-sm">IEEE Membership Number (8 digits) <span class="text-red-700 ml-1">*</span></label>
+                  <input type="text" id="m1_ieee_no" maxlength="8" class="input" placeholder="8 digits" />
+                </div>
+                <div>
+                  <label class="input_label text-sm">Membership Grade <span class="text-red-700 ml-1">*</span></label>
+                  <select id="m1_ieee_grade" class="input">
+                    <option value="Student Member">Student Member</option>
+                    <option value="Graduate Student Member">Graduate Student Member</option>
+                    <option value="Member">Member</option>
+                    <option value="Other">Other</option>
+                  </select>
+                </div>
+              </div>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label class="input_label text-sm">IEEE Student Branch <span class="text-red-700 ml-1">*</span></label>
+                  <input type="text" id="m1_ieee_branch" class="input" placeholder="e.g. IEEE NSU Student Branch" />
+                </div>
+                <div>
+                  <label class="input_label text-sm">Volunteer / Officer Position <span class="text-xs text-gray-500 font-normal">(Optional)</span></label>
+                  <input type="text" id="m1_ieee_position" class="input" placeholder="Role & branch if any" />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- MEMBER 2 -->
+          <div class="sub_card" id="member_card_2">
+            <h3 class="text-xl font-bold mb-4 text-[#00629B]">Member 2</h3>
+
+            <div class="mb-4">
+              <label class="input_label">Full Name (As on Student ID) <span class="text-red-700 ml-1">*</span></label>
+              <input type="text" id="m2_full_name" class="input" placeholder="Full name as on student ID" required />
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+              <div>
+                <label class="input_label">Email Address <span class="text-red-700 ml-1">*</span></label>
+                <input type="email" id="m2_email" class="input" placeholder="Member 2 Email" required />
+              </div>
+              <div>
+                <label class="input_label">Phone / WhatsApp Number <span class="text-red-700 ml-1">*</span></label>
+                <input type="text" id="m2_phone" class="input" placeholder="01XXXXXXXXX" maxlength="15" required />
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+              <div>
+                <label class="input_label">University <span class="text-red-700 ml-1">*</span></label>
+                <input type="text" id="m2_university" class="input" placeholder="University name" required />
+              </div>
+              <div>
+                <label class="input_label">Department <span class="text-red-700 ml-1">*</span></label>
+                <input type="text" id="m2_department" class="input" placeholder="e.g. CSE, EEE" required />
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+              <div>
+                <label class="input_label">Current Year / Semester <span class="text-red-700 ml-1">*</span></label>
+                <select id="m2_academic_year" class="input" required>
+                  <option value="1st">1st year</option>
+                  <option value="2nd">2nd year</option>
+                  <option value="3rd">3rd year</option>
+                  <option value="4th">4th year</option>
+                </select>
+              </div>
+              <div>
+                <label class="input_label">Student ID <span class="text-red-700 ml-1">*</span></label>
+                <input type="text" id="m2_student_id" class="input" placeholder="Used to verify student status" required />
+              </div>
+              <div>
+                <label class="input_label">T-Shirt Size <span class="text-red-700 ml-1">*</span></label>
+                <select id="m2_tshirt_size" class="input" required>
+                  <option value="S">S</option>
+                  <option value="M" selected>M</option>
+                  <option value="L">L</option>
+                  <option value="XL">XL</option>
+                  <option value="XXL">XXL</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="mb-4">
+              <label class="input_label">Gender <span class="text-xs text-gray-500 font-normal">(Optional)</span></label>
+              <select id="m2_gender" class="input">
+                <option value="">Prefer not to say</option>
+                <option value="male">Male</option>
+                <option value="female">Female</option>
+                <option value="prefer_not_to_say">Prefer not to say</option>
+              </select>
+            </div>
+
+            <div class="mb-4">
+              <label class="input_label">Are you an IEEE Member? <span class="text-red-700 ml-1">*</span></label>
+              <label class="mr-4 text-base cursor-pointer">
+                <input type="radio" name="m2_is_ieee" value="no" checked onchange="toggleIeee(2)" /> No
+              </label>
+              <label class="text-base cursor-pointer">
+                <input type="radio" name="m2_is_ieee" value="yes" onchange="toggleIeee(2)" /> Yes
+              </label>
+            </div>
+
+            <div id="m2_ieee_box" class="hidden p-4 rounded bg-[#bfdff5]/40 border border-[#00629B]/30 mt-3">
+              <h4 class="font-bold text-sm text-[#00629B] mb-3">Section 3: IEEE Membership Details</h4>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-3">
+                <div>
+                  <label class="input_label text-sm">IEEE Membership Number (8 digits) <span class="text-red-700 ml-1">*</span></label>
+                  <input type="text" id="m2_ieee_no" maxlength="8" class="input" placeholder="8 digits" />
+                </div>
+                <div>
+                  <label class="input_label text-sm">Membership Grade <span class="text-red-700 ml-1">*</span></label>
+                  <select id="m2_ieee_grade" class="input">
+                    <option value="Student Member">Student Member</option>
+                    <option value="Graduate Student Member">Graduate Student Member</option>
+                    <option value="Member">Member</option>
+                    <option value="Other">Other</option>
+                  </select>
+                </div>
+              </div>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label class="input_label text-sm">IEEE Student Branch <span class="text-red-700 ml-1">*</span></label>
+                  <input type="text" id="m2_ieee_branch" class="input" placeholder="e.g. IEEE NSU Student Branch" />
+                </div>
+                <div>
+                  <label class="input_label text-sm">Volunteer / Officer Position <span class="text-xs text-gray-500 font-normal">(Optional)</span></label>
+                  <input type="text" id="m2_ieee_position" class="input" placeholder="Role & branch if any" />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- MEMBER 3 (shown only if team_size == 3) -->
+          <div class="sub_card hidden" id="member_card_3">
+            <h3 class="text-xl font-bold mb-4 text-[#00629B]">Member 3</h3>
+
+            <div class="mb-4">
+              <label class="input_label">Full Name (As on Student ID) <span class="text-red-700 ml-1">*</span></label>
+              <input type="text" id="m3_full_name" class="input" placeholder="Full name as on student ID" />
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+              <div>
+                <label class="input_label">Email Address <span class="text-red-700 ml-1">*</span></label>
+                <input type="email" id="m3_email" class="input" placeholder="Member 3 Email" />
+              </div>
+              <div>
+                <label class="input_label">Phone / WhatsApp Number <span class="text-red-700 ml-1">*</span></label>
+                <input type="text" id="m3_phone" class="input" placeholder="01XXXXXXXXX" maxlength="15" />
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+              <div>
+                <label class="input_label">University <span class="text-red-700 ml-1">*</span></label>
+                <input type="text" id="m3_university" class="input" placeholder="University name" />
+              </div>
+              <div>
+                <label class="input_label">Department <span class="text-red-700 ml-1">*</span></label>
+                <input type="text" id="m3_department" class="input" placeholder="e.g. CSE, EEE" />
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+              <div>
+                <label class="input_label">Current Year / Semester <span class="text-red-700 ml-1">*</span></label>
+                <select id="m3_academic_year" class="input">
+                  <option value="1st">1st year</option>
+                  <option value="2nd">2nd year</option>
+                  <option value="3rd">3rd year</option>
+                  <option value="4th">4th year</option>
+                </select>
+              </div>
+              <div>
+                <label class="input_label">Student ID <span class="text-red-700 ml-1">*</span></label>
+                <input type="text" id="m3_student_id" class="input" placeholder="Used to verify student status" />
+              </div>
+              <div>
+                <label class="input_label">T-Shirt Size <span class="text-red-700 ml-1">*</span></label>
+                <select id="m3_tshirt_size" class="input">
+                  <option value="S">S</option>
+                  <option value="M" selected>M</option>
+                  <option value="L">L</option>
+                  <option value="XL">XL</option>
+                  <option value="XXL">XXL</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="mb-4">
+              <label class="input_label">Gender <span class="text-xs text-gray-500 font-normal">(Optional)</span></label>
+              <select id="m3_gender" class="input">
+                <option value="">Prefer not to say</option>
+                <option value="male">Male</option>
+                <option value="female">Female</option>
+                <option value="prefer_not_to_say">Prefer not to say</option>
+              </select>
+            </div>
+
+            <div class="mb-4">
+              <label class="input_label">Are you an IEEE Member? <span class="text-red-700 ml-1">*</span></label>
+              <label class="mr-4 text-base cursor-pointer">
+                <input type="radio" name="m3_is_ieee" value="no" checked onchange="toggleIeee(3)" /> No
+              </label>
+              <label class="text-base cursor-pointer">
+                <input type="radio" name="m3_is_ieee" value="yes" onchange="toggleIeee(3)" /> Yes
+              </label>
+            </div>
+
+            <div id="m3_ieee_box" class="hidden p-4 rounded bg-[#bfdff5]/40 border border-[#00629B]/30 mt-3">
+              <h4 class="font-bold text-sm text-[#00629B] mb-3">Section 3: IEEE Membership Details</h4>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-3">
+                <div>
+                  <label class="input_label text-sm">IEEE Membership Number (8 digits) <span class="text-red-700 ml-1">*</span></label>
+                  <input type="text" id="m3_ieee_no" maxlength="8" class="input" placeholder="8 digits" />
+                </div>
+                <div>
+                  <label class="input_label text-sm">Membership Grade <span class="text-red-700 ml-1">*</span></label>
+                  <select id="m3_ieee_grade" class="input">
+                    <option value="Student Member">Student Member</option>
+                    <option value="Graduate Student Member">Graduate Student Member</option>
+                    <option value="Member">Member</option>
+                    <option value="Other">Other</option>
+                  </select>
+                </div>
+              </div>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label class="input_label text-sm">IEEE Student Branch <span class="text-red-700 ml-1">*</span></label>
+                  <input type="text" id="m3_ieee_branch" class="input" placeholder="e.g. IEEE NSU Student Branch" />
+                </div>
+                <div>
+                  <label class="input_label text-sm">Volunteer / Officer Position <span class="text-xs text-gray-500 font-normal">(Optional)</span></label>
+                  <input type="text" id="m3_ieee_position" class="input" placeholder="Role & branch if any" />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="flex justify-between items-center mt-6">
+            <button onclick="prevStep(1)" class="back-btn" type="button">&larr; Back</button>
+            <button onclick="nextStep(2)" class="continue-btn" type="button">Continue &rarr;</button>
+          </div>
+        </section>
+
+        <!-- STEP 3: AGREEMENTS & DECLARATIONS -->
+        <section id="step3" class="hidden shadow-md p-5 font-medium rounded-md">
+          <div class="flex items-center justify-between mb-4">
+            <button onclick="prevStep(2)" class="back-btn" type="button">
+              &larr; Back
+            </button>
+          </div>
+
+          <h2 class="section_heading">Agreements and Declarations</h2>
+          <p class="mb-4 text-sm text-[#122812]/90">Please confirm all of the following statements before submitting:</p>
+
+          <div class="space-y-3 mb-6 bg-white/40 p-4 rounded border border-white/60">
+            <label class="flex items-start gap-3 text-base cursor-pointer">
+              <input type="checkbox" id="agree_enrolled" class="mt-1 w-5 h-5 accent-[#00629B]" required />
+              <span>Everyone on my team is a currently enrolled university student. <span class="text-red-700">*</span></span>
+            </label>
+            <label class="flex items-start gap-3 text-base cursor-pointer">
+              <input type="checkbox" id="agree_consent" class="mt-1 w-5 h-5 accent-[#00629B]" required />
+              <span>All team members have agreed to take part and the details above are correct. <span class="text-red-700">*</span></span>
+            </label>
+            <label class="flex items-start gap-3 text-base cursor-pointer">
+              <input type="checkbox" id="agree_composition" class="mt-1 w-5 h-5 accent-[#00629B]" required />
+              <span>Team composition is final after submission and cannot be changed. <span class="text-red-700">*</span></span>
+            </label>
+            <label class="flex items-start gap-3 text-base cursor-pointer">
+              <input type="checkbox" id="agree_rules" class="mt-1 w-5 h-5 accent-[#00629B]" required />
+              <span>We will follow the rules: zero tolerance for plagiarism, one submission per team, no extensions. <span class="text-red-700">*</span></span>
+            </label>
+            <label class="flex items-start gap-3 text-base cursor-pointer">
+              <input type="checkbox" id="agree_originality" class="mt-1 w-5 h-5 accent-[#00629B]" required />
+              <span>We understand that identical or near-identical entries lead to immediate disqualification. <span class="text-red-700">*</span></span>
+            </label>
+            <label class="flex items-start gap-3 text-base cursor-pointer">
+              <input type="checkbox" id="agree_announcements" class="mt-1 w-5 h-5 accent-[#00629B]" required />
+              <span>We agree that our names, university and results may be shared for event announcements and results. <span class="text-red-700">*</span></span>
+            </label>
+            <label class="flex items-start gap-3 text-base cursor-pointer">
+              <input type="checkbox" id="agree_media" class="mt-1 w-5 h-5 accent-[#00629B]" required />
+              <span>We give permission for photos and videos taken at the event to be used for publicity. <span class="text-red-700">*</span></span>
+            </label>
+          </div>
+
+          <div class="mb-6">
+            <label for="leader_signature" class="input_label">
+              Team Leader's Full Name (Type to sign this declaration) <span class="text-red-700 ml-1">*</span>
+            </label>
+            <input
+              type="text"
+              name="leader_signature"
+              id="leader_signature"
+              placeholder="Type your full name as digital signature"
+              class="input"
+              required
+            />
+          </div>
+
+          <div class="flex justify-between items-center mt-6">
+            <button onclick="prevStep(2)" class="back-btn" type="button">&larr; Back</button>
+            <button type="button" onclick="submitForm()" id="submitBtn" class="continue-btn">
+              Submit Team Registration
+            </button>
+          </div>
+        </section>
+      </form>
+      {% endif %}
+    </div>
+
+    <script>
+      // 1. Particles initialization
+      document.addEventListener("DOMContentLoaded", function () {
+        if (typeof particlesJS === "function" && document.getElementById("particles-js")) {
+          particlesJS("particles-js", {
+            particles: {
+              number: { value: 40, density: { enable: true, value_area: 800 } },
+              color: { value: "#ffffff" },
+              shape: { type: "circle" },
+              opacity: { value: 0.9, random: true },
+              size: { value: 3, random: true },
+              line_linked: { enable: false },
+              move: { enable: true, speed: 1, random: true, out_mode: "out" },
+            },
+            interactivity: {
+              detect_on: "canvas",
+              events: { onhover: { enable: false }, onclick: { enable: false }, resize: true },
+            },
+            retina_detect: true,
+          });
+        }
+      });
+
+      // 2. Sync Leader Contact to Member 1
+      const leaderEmail = document.getElementById("leader_email");
+      const leaderPhone = document.getElementById("leader_phone");
+      const m1Email = document.getElementById("m1_email");
+      const m1Phone = document.getElementById("m1_phone");
+
+      if (leaderEmail && m1Email) {
+        leaderEmail.addEventListener("input", function () {
+          m1Email.value = this.value.trim();
+        });
+      }
+      if (leaderPhone && m1Phone) {
+        leaderPhone.addEventListener("input", function () {
+          m1Phone.value = this.value.trim();
+        });
+      }
+
+      // 3. Team size change handler
+      const teamSizeSelect = document.getElementById("team_size");
+      const member3Card = document.getElementById("member_card_3");
+
+      if (teamSizeSelect && member3Card) {
+        teamSizeSelect.addEventListener("change", function () {
+          if (this.value === "3") {
+            member3Card.classList.remove("hidden");
+          } else {
+            member3Card.classList.add("hidden");
+          }
+        });
+      }
+
+      // 4. Toggle IEEE Section
+      function toggleIeee(num) {
+        const radios = document.getElementsByName(`m${num}_is_ieee`);
+        const box = document.getElementById(`m${num}_ieee_box`);
+        for (let r of radios) {
+          if (r.checked) {
+            if (r.value === "yes") {
+              box.classList.remove("hidden");
+            } else {
+              box.classList.add("hidden");
+            }
+          }
+        }
+      }
+
+      // 5. Step Navigation (matching form.html multi-step conventions)
+      function nextStep(current) {
+        if (current === 1) {
+          const teamName = document.getElementById("team_name").value.trim();
+          const email = leaderEmail.value.trim();
+          const phone = leaderPhone.value.trim();
+
+          const nameRegex = /^[A-Za-z0-9]+_[A-Za-z0-9]+$/;
+          if (!nameRegex.test(teamName)) {
+            Swal.fire({
+              icon: "error",
+              title: "Invalid Team Name",
+              text: "Format must be InstitutionShortName_UniqueName (e.g. NSU_TechTitans) with letters/numbers and exactly one underscore.",
+            });
+            return;
+          }
+
+          if (!email || !phone) {
+            Swal.fire({
+              icon: "warning",
+              title: "Missing Fields",
+              text: "Please provide team leader's email and phone number.",
+            });
+            return;
+          }
+
+          const phoneRegex = /^01[0-9]{9}$/;
+          const cleanPhone = phone.replace(/[\s\-]+/g, "");
+          if (!phoneRegex.test(cleanPhone)) {
+            Swal.fire({
+              icon: "error",
+              title: "Invalid Phone Number",
+              text: "Phone number must be 11 digits starting with 01.",
+            });
+            return;
+          }
+
+          document.getElementById("step1").classList.add("hidden");
+          document.getElementById("step2").classList.remove("hidden");
+          document.getElementById("step1Indicator").classList.remove("text-[#00629B]", "border-b-2", "border-[#00629B]");
+          document.getElementById("step1Indicator").classList.add("text-gray-500");
+          document.getElementById("step2Indicator").classList.add("text-[#00629B]", "border-b-2", "border-[#00629B]");
+          document.getElementById("step2Indicator").classList.remove("text-gray-500");
+          window.scrollTo({ top: 300, behavior: "smooth" });
+        } else if (current === 2) {
+          // Validate Member 1
+          const m1Name = document.getElementById("m1_full_name").value.trim();
+          const m1Uni = document.getElementById("m1_university").value.trim();
+          const m1Dept = document.getElementById("m1_department").value.trim();
+          const m1Id = document.getElementById("m1_student_id").value.trim();
+
+          if (!m1Name || !m1Uni || !m1Dept || !m1Id) {
+            Swal.fire({
+              icon: "warning",
+              title: "Member 1 Incomplete",
+              text: "Please fill out all required fields for Team Leader.",
+            });
+            return;
+          }
+
+          // Validate Member 2
+          const m2Name = document.getElementById("m2_full_name").value.trim();
+          const m2Email = document.getElementById("m2_email").value.trim();
+          const m2Phone = document.getElementById("m2_phone").value.trim();
+          const m2Uni = document.getElementById("m2_university").value.trim();
+          const m2Dept = document.getElementById("m2_department").value.trim();
+          const m2Id = document.getElementById("m2_student_id").value.trim();
+
+          if (!m2Name || !m2Email || !m2Phone || !m2Uni || !m2Dept || !m2Id) {
+            Swal.fire({
+              icon: "warning",
+              title: "Member 2 Incomplete",
+              text: "Please fill out all required fields for Member 2.",
+            });
+            return;
+          }
+
+          // Validate Member 3 if 3 members chosen
+          const size = teamSizeSelect.value;
+          if (size === "3") {
+            const m3Name = document.getElementById("m3_full_name").value.trim();
+            const m3Email = document.getElementById("m3_email").value.trim();
+            const m3Phone = document.getElementById("m3_phone").value.trim();
+            const m3Uni = document.getElementById("m3_university").value.trim();
+            const m3Dept = document.getElementById("m3_department").value.trim();
+            const m3Id = document.getElementById("m3_student_id").value.trim();
+
+            if (!m3Name || !m3Email || !m3Phone || !m3Uni || !m3Dept || !m3Id) {
+              Swal.fire({
+                icon: "warning",
+                title: "Member 3 Incomplete",
+                text: "Please fill out all required fields for Member 3.",
+              });
+              return;
+            }
+          }
+
+          document.getElementById("step2").classList.add("hidden");
+          document.getElementById("step3").classList.remove("hidden");
+          document.getElementById("step2Indicator").classList.remove("text-[#00629B]", "border-b-2", "border-[#00629B]");
+          document.getElementById("step2Indicator").classList.add("text-gray-500");
+          document.getElementById("step3Indicator").classList.add("text-[#00629B]", "border-b-2", "border-[#00629B]");
+          document.getElementById("step3Indicator").classList.remove("text-gray-500");
+          window.scrollTo({ top: 300, behavior: "smooth" });
+        }
+      }
+
+      function prevStep(target) {
+        if (target === 1) {
+          document.getElementById("step2").classList.add("hidden");
+          document.getElementById("step1").classList.remove("hidden");
+          document.getElementById("step2Indicator").classList.remove("text-[#00629B]", "border-b-2", "border-[#00629B]");
+          document.getElementById("step2Indicator").classList.add("text-gray-500");
+          document.getElementById("step1Indicator").classList.add("text-[#00629B]", "border-b-2", "border-[#00629B]");
+          document.getElementById("step1Indicator").classList.remove("text-gray-500");
+        } else if (target === 2) {
+          document.getElementById("step3").classList.add("hidden");
+          document.getElementById("step2").classList.remove("hidden");
+          document.getElementById("step3Indicator").classList.remove("text-[#00629B]", "border-b-2", "border-[#00629B]");
+          document.getElementById("step3Indicator").classList.add("text-gray-500");
+          document.getElementById("step2Indicator").classList.add("text-[#00629B]", "border-b-2", "border-[#00629B]");
+          document.getElementById("step2Indicator").classList.remove("text-gray-500");
+        }
+        window.scrollTo({ top: 300, behavior: "smooth" });
+      }
+
+      // 6. Submit Payload Assembly
+      async function submitForm() {
+        const checkboxes = [
+          "agree_enrolled",
+          "agree_consent",
+          "agree_composition",
+          "agree_rules",
+          "agree_originality",
+          "agree_announcements",
+          "agree_media",
+        ];
+
+        for (let id of checkboxes) {
+          const el = document.getElementById(id);
+          if (!el || !el.checked) {
+            Swal.fire({
+              icon: "warning",
+              title: "Agreement Required",
+              text: "All 7 declarations must be checked to complete submission.",
+            });
+            return;
+          }
+        }
+
+        const signature = document.getElementById("leader_signature").value.trim();
+        if (!signature) {
+          Swal.fire({
+            icon: "warning",
+            title: "Signature Required",
+            text: "Please type the Team Leader's full name to sign the declaration.",
+          });
+          return;
+        }
+
+        const teamSize = parseInt(teamSizeSelect.value, 10);
+        const uniDist = document.querySelector('input[name="university_distribution"]:checked').value;
+
+        function getMemberData(num) {
+          const isIeee = document.querySelector(`input[name="m${num}_is_ieee"]:checked`).value === "yes";
+          return {
+            full_name: document.getElementById(`m${num}_full_name`).value.trim(),
+            email: num === 1 ? leaderEmail.value.trim() : document.getElementById(`m${num}_email`).value.trim(),
+            phone_number: num === 1 ? leaderPhone.value.trim() : document.getElementById(`m${num}_phone`).value.trim(),
+            university: document.getElementById(`m${num}_university`).value.trim(),
+            department: document.getElementById(`m${num}_department`).value.trim(),
+            academic_year: document.getElementById(`m${num}_academic_year`).value,
+            student_id: document.getElementById(`m${num}_student_id`).value.trim(),
+            gender: document.getElementById(`m${num}_gender`).value || null,
+            tshirt_size: document.getElementById(`m${num}_tshirt_size`).value,
+            is_ieee_member: isIeee,
+            ieee_membership_no: isIeee ? document.getElementById(`m${num}_ieee_no`).value.trim() : "",
+            ieee_membership_grade: isIeee ? document.getElementById(`m${num}_ieee_grade`).value : "",
+            ieee_student_branch: isIeee ? document.getElementById(`m${num}_ieee_branch`).value.trim() : "",
+            ieee_volunteer_position: isIeee ? document.getElementById(`m${num}_ieee_position`).value.trim() : "",
+          };
+        }
+
+        const members = [getMemberData(1), getMemberData(2)];
+        if (teamSize === 3) {
+          members.push(getMemberData(3));
+        }
+
+        const payload = {
+          team_name: document.getElementById("team_name").value.trim(),
+          team_size: teamSize,
+          university_distribution: uniDist,
+          leader_email: leaderEmail.value.trim(),
+          leader_phone: leaderPhone.value.trim(),
+          members: members,
+          agreements: {
+            enrolled_students: document.getElementById("agree_enrolled").checked,
+            member_consent: document.getElementById("agree_consent").checked,
+            composition_final: document.getElementById("agree_composition").checked,
+            rules_plagiarism: document.getElementById("agree_rules").checked,
+            originality: document.getElementById("agree_originality").checked,
+            announcements: document.getElementById("agree_announcements").checked,
+            media_permission: document.getElementById("agree_media").checked,
+          },
+          leader_signature: signature,
+        };
+
+        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+        const submitBtn = document.getElementById("submitBtn");
+        submitBtn.disabled = true;
+
+        Swal.fire({
+          title: "Submitting...",
+          text: "Registering your hackathon team. Please wait.",
+          allowOutsideClick: false,
+          didOpen: () => {
+            Swal.showLoading();
+          },
+        });
+
+        try {
+          const res = await fetch("{% url 'hackathon:submit_phase01' %}", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "X-CSRFToken": csrfToken,
+            },
+            body: JSON.stringify(payload),
+          });
+
+          const data = await res.json();
+          if (res.ok && data.success) {
+            Swal.fire({
+              icon: "success",
+              title: "Team Registered!",
+              html: `<strong>${data.team_name}</strong> is in!<br><br>A confirmation email has been dispatched to <em>${leaderEmail.value.trim()}</em>.<br><br>Your Team ID: <strong>#${data.team_id}</strong>`,
+              confirmButtonText: "Done",
+              confirmButtonColor: "#00629B",
+            }).then(() => {
+              window.location.reload();
+            });
+          } else {
+            let errorMsg = data.message || "Failed to submit registration.";
+            if (data.errors) {
+              const errList = Object.entries(data.errors)
+                .map(([f, errs]) => `&bull; ${Array.isArray(errs) ? errs.join(", ") : errs}`)
+                .join("<br>");
+              errorMsg += `<br><br><div class="text-left text-xs bg-red-50 p-2 rounded">${errList}</div>`;
+            }
+            Swal.fire({
+              icon: "error",
+              title: "Registration Failed",
+              html: errorMsg,
+            });
+          }
+        } catch (err) {
+          console.error("Submission error:", err);
+          Swal.fire({
+            icon: "error",
+            title: "Network Error",
+            text: "Failed to connect to the server. Please check your network and try again.",
+          });
+        } finally {
+          submitBtn.disabled = false;
+        }
+      }
+
+      // 7. Publish Toggle (Staff View)
+      {% if is_staff_view %}
+      const publishToggle = document.getElementById("publishToggle");
+      const publishCheckbox = document.getElementById("publishCheckbox");
+      const publishText = document.getElementById("publishText");
+
+      if (publishToggle) {
+        publishToggle.addEventListener("click", function (e) {
+          e.preventDefault();
+          const nextState = !publishCheckbox.checked;
+
+          Swal.fire({
+            title: nextState ? "Publish Form?" : "Unpublish Form?",
+            text: nextState
+              ? "This will make the Hackathon Phase 1 registration form accessible to the public."
+              : "This will close the Hackathon Phase 1 registration form to the public.",
+            icon: "question",
+            showCancelButton: true,
+            confirmButtonColor: "#00629B",
+            cancelButtonColor: "#d33",
+            confirmButtonText: nextState ? "Yes, publish it!" : "Yes, unpublish it!",
+          }).then(async (result) => {
+            if (result.isConfirmed) {
+              const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+              try {
+                const res = await fetch("{% url 'hackathon:toggle_publish_phase01' %}", {
+                  method: "POST",
+                  headers: {
+                    "X-CSRFToken": csrfToken,
+                    "Content-Type": "application/json",
+                  },
+                });
+                const data = await res.json();
+                if (data.success) {
+                  publishCheckbox.checked = data.is_published;
+                  if (data.is_published) {
+                    publishText.textContent = "Form published!";
+                    publishText.style.color = "#00629B";
+                  } else {
+                    publishText.textContent = "Publish Form?";
+                    publishText.style.color = "rgb(207, 25, 18)";
+                  }
+                  Swal.fire({
+                    icon: "success",
+                    title: "Status Updated",
+                    text: data.is_published ? "Form is now live." : "Form is now unpublished.",
+                    timer: 1500,
+                    showConfirmButton: false,
+                  });
+                }
+              } catch (err) {
+                console.error("Publish toggle error:", err);
+                Swal.fire({
+                  icon: "error",
+                  title: "Error",
+                  text: "Failed to update form status.",
+                });
+              }
+            }
+          });
+        });
+      }
+      {% endif %}
+    </script>
   </body>
 </html>
