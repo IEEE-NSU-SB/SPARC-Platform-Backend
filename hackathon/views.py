@@ -25,14 +25,23 @@ from .models import (
     HackathonFormStatus_Phase01,
     HackathonMember_Phase01,
     HackathonTeam_Phase01,
+    HackathonFormStatus_Phase02,
+    HackathonTeam_Unique_Code_Phase_2,
+    HackathonTeam_Phase02,
+    HackathonMember_Phase02,
 )
-from .utils import get_phase01_tab_counts
+from .utils import get_phase01_tab_counts, get_phase02_tab_counts
 
 # Create your views here
 
 
 def _get_publish_status_phase01() -> bool:
     status = HackathonFormStatus_Phase01.objects.order_by('-updated_at').first()
+    return bool(status and status.is_published)
+
+
+def _get_publish_status_phase02() -> bool:
+    status = HackathonFormStatus_Phase02.objects.order_by('-updated_at').first()
     return bool(status and status.is_published)
 
 
@@ -274,6 +283,289 @@ def submit_phase01(request):
         )
 
 
+def form_phase02(request):
+    """
+    Public Hackathon Phase 2 form gated strictly by single-use token.
+    Redirects staff/permitted admins to admin preview.
+    """
+    if request.user.is_authenticated and request.user.is_staff:
+        return redirect('hackathon:admin_phase02')
+
+    if request.user.is_authenticated:
+        if not Site_Permissions.user_has_permission(request.user, 'reg_form_control'):
+            return redirect('core:dashboard')
+        elif not Site_Permissions.user_has_permission(request.user, 'view_qr_dashboard'):
+            return redirect('hackathon:admin_phase02')
+        else:
+            return redirect('core:dashboard')
+
+    token = (request.GET.get('token') or '').strip()
+    if not token:
+        return render(
+            request,
+            'check_token.html',
+            {'message': 'Token was not found! Please use the link given in your email.'},
+        )
+
+    unique_code_obj = (
+        HackathonTeam_Unique_Code_Phase_2.objects
+        .filter(unique_code=token, is_active=True)
+        .select_related('team')
+        .first()
+    )
+
+    if not unique_code_obj:
+        return render(
+            request,
+            'check_token.html',
+            {'message': 'Invalid or expired token! Please use the link given in your email.'},
+        )
+
+    phase1_team = unique_code_obj.team
+    members = phase1_team.members.all().order_by('member_order')
+    team_count = HackathonTeam_Phase02.objects.count()
+    registration_closed = team_count >= 10000
+
+    context = {
+        'is_staff_view': False,
+        'is_published': _get_publish_status_phase02(),
+        'registration_closed': registration_closed,
+        'token': token,
+        'team': phase1_team,
+        'members': members,
+    }
+    return render(request, 'hackathon_form_phase02.html', context)
+
+
+@login_required
+@permission_required('reg_form_control')
+def admin_phase02(request):
+    """Staff-only preview and control view for the Hackathon Phase 2 form."""
+    registration_count = HackathonTeam_Phase02.objects.count()
+    people_count = HackathonMember_Phase02.objects.count()
+
+    sample_team = (
+        HackathonTeam_Phase01.objects
+        .filter(is_selected=True)
+        .prefetch_related('members')
+        .first()
+    )
+    if not sample_team:
+        sample_team = HackathonTeam_Phase01.objects.prefetch_related('members').first()
+
+    sample_members = sample_team.members.all().order_by('member_order') if sample_team else []
+
+    permissions = {
+        'reg_form_control': Site_Permissions.user_has_permission(request.user, 'reg_form_control'),
+        'view_reg_responses_list': Site_Permissions.user_has_permission(request.user, 'view_reg_responses_list'),
+        'view_finance_info': Site_Permissions.user_has_permission(request.user, 'view_finance_info'),
+        'view_qr_dashboard': Site_Permissions.user_has_permission(request.user, 'view_qr_dashboard'),
+    }
+
+    context = {
+        'is_staff_view': True,
+        'is_published': _get_publish_status_phase02(),
+        'registration_count': registration_count,
+        'people_count': people_count,
+        'has_perm': permissions,
+        'token': 'ADMIN_PREVIEW_TOKEN',
+        'team': sample_team,
+        'members': sample_members,
+    }
+    return render(request, 'hackathon_form_phase02.html', context)
+
+
+@login_required
+@permission_required('reg_form_control')
+@require_POST
+def toggle_publish_phase02(request):
+    """Independently toggles Hackathon Phase 2 public availability."""
+    status = HackathonFormStatus_Phase02.objects.order_by('-updated_at').first()
+    if not status:
+        status = HackathonFormStatus_Phase02.objects.create(is_published=True)
+    else:
+        status.is_published = not status.is_published
+        status.save(update_fields=['is_published', 'updated_at'])
+    return JsonResponse({'success': True, 'is_published': status.is_published})
+
+
+@require_POST
+def submit_phase02(request):
+    """
+    Validates token, saves Hackathon Phase 2 team and members with selected T-shirt sizes,
+    deactivates the token, and emails Phase 2 confirmation to ALL team members.
+    """
+    try:
+        is_privileged = request.user.is_authenticated and (
+            request.user.is_staff
+            or Site_Permissions.user_has_permission(request.user, 'reg_form_control')
+        )
+        if not is_privileged and not _get_publish_status_phase02():
+            return JsonResponse(
+                {'success': False, 'message': 'Hackathon Phase 2 registration is currently closed.'},
+                status=403,
+            )
+
+        try:
+            payload = json.loads(request.body)
+        except json.JSONDecodeError:
+            return JsonResponse(
+                {'success': False, 'message': 'Invalid request payload format.'},
+                status=400,
+            )
+
+        token = (payload.get('token') or '').strip()
+        if not token:
+            return JsonResponse(
+                {'success': False, 'message': 'Token was not provided.'},
+                status=400,
+            )
+
+        unique_code_obj = (
+            HackathonTeam_Unique_Code_Phase_2.objects
+            .filter(unique_code=token, is_active=True)
+            .select_related('team')
+            .first()
+        )
+
+        if not unique_code_obj:
+            return JsonResponse(
+                {'success': False, 'message': 'Invalid or expired token. Submission could not be completed.'},
+                status=400,
+            )
+
+        phase1_team = unique_code_obj.team
+        p1_members = list(phase1_team.members.all().order_by('member_order'))
+
+        if HackathonTeam_Phase02.objects.filter(phase1_team=phase1_team).exists():
+            return JsonResponse(
+                {'success': False, 'message': 'Phase 2 registration has already been submitted for this team.'},
+                status=400,
+            )
+
+        payment_method = (payload.get('payment_method') or 'Bkash').strip()
+        if payment_method not in ('Bkash', 'Nagad'):
+            return JsonResponse(
+                {'success': False, 'message': 'Payment method must be either Bkash or Nagad.'},
+                status=400,
+            )
+
+        sender_number = _normalize_phone(payload.get('sender_number', ''))
+        if not re.match(r'^(?:\+?88)?01[3-9]\d{8}$', sender_number):
+            return JsonResponse(
+                {'success': False, 'message': 'Please enter a valid 11-digit Bangladeshi sender phone number.'},
+                status=400,
+            )
+
+        transaction_id = (payload.get('transaction_id') or '').strip().upper()
+        if not transaction_id or len(transaction_id) < 4:
+            return JsonResponse(
+                {'success': False, 'message': 'Please enter a valid Transaction ID.'},
+                status=400,
+            )
+
+        if HackathonTeam_Phase02.objects.filter(transaction_id__iexact=transaction_id).exists():
+            return JsonResponse(
+                {'success': False, 'message': 'This Transaction ID has already been recorded in Phase 2.'},
+                status=400,
+            )
+
+        member_tshirts = payload.get('member_tshirts', {}) or {}
+        valid_sizes = {'S', 'M', 'L', 'XL', '2XL', '3XL'}
+
+        size_by_id = {}
+        size_by_index = {}
+        if isinstance(member_tshirts, dict):
+            for k, v in member_tshirts.items():
+                v_clean = str(v).strip().upper()
+                if str(k).isdigit():
+                    size_by_id[int(k)] = v_clean
+                    size_by_index[int(k)] = v_clean
+        elif isinstance(member_tshirts, list):
+            for idx, item in enumerate(member_tshirts, start=1):
+                if isinstance(item, dict):
+                    m_id = item.get('member_id')
+                    s_val = str(item.get('tshirt_size') or '').strip().upper()
+                    if m_id and str(m_id).isdigit():
+                        size_by_id[int(m_id)] = s_val
+                    size_by_index[idx] = s_val
+                elif isinstance(item, str):
+                    size_by_index[idx] = item.strip().upper()
+
+        member_size_resolutions = []
+        for idx, m in enumerate(p1_members, start=1):
+            chosen_size = size_by_id.get(m.id) or size_by_index.get(idx)
+            if not chosen_size or chosen_size not in valid_sizes:
+                role_label = "Team Leader" if m.is_leader else f"Member {m.member_order}"
+                return JsonResponse(
+                    {
+                        'success': False,
+                        'message': f'Please select a valid T-shirt size (S, M, L, XL, 2XL, 3XL) for {role_label} ({m.full_name}).',
+                    },
+                    status=400,
+                )
+            member_size_resolutions.append((m, chosen_size))
+
+        comments = (payload.get('comments') or '').strip()
+
+        with transaction.atomic():
+            team_p02 = HackathonTeam_Phase02.objects.create(
+                phase1_team=phase1_team,
+                team_name=phase1_team.team_name,
+                team_size=phase1_team.team_size,
+                leader_email=phase1_team.leader_email,
+                leader_phone=phase1_team.leader_phone,
+                payment_method=payment_method,
+                sender_number=sender_number,
+                transaction_id=transaction_id,
+                comments=comments if comments else None,
+                is_payment_confirmed=False,
+            )
+
+            for m, t_size in member_size_resolutions:
+                HackathonMember_Phase02.objects.create(
+                    team=team_p02,
+                    phase1_member=m,
+                    member_order=m.member_order,
+                    is_leader=m.is_leader,
+                    full_name=m.full_name,
+                    email=m.email,
+                    phone_number=m.phone_number,
+                    university=m.university,
+                    department=m.department,
+                    academic_year=m.academic_year,
+                    student_id=m.student_id,
+                    gender=m.gender,
+                    is_ieee_member=m.is_ieee_member,
+                    ieee_membership_no=m.ieee_membership_no,
+                    tshirt_size=t_size,
+                )
+
+            unique_code_obj.is_active = False
+            unique_code_obj.save(update_fields=['is_active'])
+
+        try:
+            send_hackathon_email_phase02(request, team_p02)
+        except Exception as email_exc:
+            log_exception(email_exc, request)
+
+        return JsonResponse(
+            {
+                'success': True,
+                'message': f'Phase 02 registration for team "{team_p02.team_name}" submitted successfully! Confirmation emails have been sent to all members.',
+                'team_id': team_p02.id,
+            },
+            status=201,
+        )
+
+    except Exception as exc:
+        log_exception(exc, request)
+        return JsonResponse(
+            {'success': False, 'message': 'An unexpected server error occurred during Phase 02 submission.'},
+            status=500,
+        )
+
+
 @login_required
 @permission_required('view_reg_responses_list')
 def response_table_phase01(request):
@@ -505,4 +797,218 @@ def download_excel_phase01(request):
         content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
     )
     response['Content-Disposition'] = 'attachment; filename="hackathon_phase01_data.xlsx"'
+    return response
+
+
+@login_required
+@permission_required('view_reg_responses_list')
+def response_table_phase02(request):
+    """Admin response table for Hackathon Phase 2 teams with payment verification and T-shirt statistics."""
+    permissions = {
+        'view_finance_info': Site_Permissions.user_has_permission(request.user, 'view_finance_info'),
+        'reg_form_control': Site_Permissions.user_has_permission(request.user, 'reg_form_control'),
+    }
+
+    teams = (
+        HackathonTeam_Phase02.objects
+        .prefetch_related('members')
+        .all()
+        .order_by('created_at')
+    )
+
+    reg_stats = HackathonTeam_Phase02.objects.aggregate(
+        total_teams=Count('id'),
+        total_participants=Sum('team_size'),
+        total_confirmed=Count('id', filter=Q(is_payment_confirmed=True)),
+        total_pending=Count('id', filter=Q(is_payment_confirmed=False)),
+    )
+    reg_stats['total_participants'] = reg_stats['total_participants'] or 0
+
+    payment_stats = {
+        'bkash_count': HackathonTeam_Phase02.objects.filter(payment_method='Bkash').count(),
+        'nagad_count': HackathonTeam_Phase02.objects.filter(payment_method='Nagad').count(),
+    }
+
+    # Aggregate T-Shirt counts across all members
+    tshirt_counts = (
+        HackathonMember_Phase02.objects
+        .exclude(tshirt_size__isnull=True)
+        .exclude(tshirt_size='')
+        .values('tshirt_size')
+        .annotate(count=Count('id'))
+        .order_by('-count')
+    )
+    total_tshirts = (
+        HackathonMember_Phase02.objects
+        .exclude(tshirt_size__isnull=True)
+        .exclude(tshirt_size='')
+        .count()
+    )
+
+    tshirt_data = []
+    for item in tshirt_counts:
+        pct = round((item['count'] / total_tshirts * 100), 1) if total_tshirts else 0
+        tshirt_data.append({
+            'tshirt_size': item['tshirt_size'],
+            'count': item['count'],
+            'percentage': pct,
+        })
+
+    university_data = (
+        HackathonMember_Phase02.objects
+        .exclude(university__isnull=True)
+        .exclude(university='')
+        .annotate(university_sanitized=Trim('university'))
+        .values('university_sanitized')
+        .annotate(total=Count('id'))
+        .order_by('-total')
+    )
+
+    context = {
+        'teams': teams,
+        'reg_stats': reg_stats,
+        'payment_stats': payment_stats,
+        'tshirt_data': tshirt_data,
+        'total_tshirts': total_tshirts,
+        'university_data': university_data,
+        'tab_counts': get_phase02_tab_counts(),
+        'has_perm': permissions,
+    }
+    return render(request, 'hackathon_response_table_phase02.html', context)
+
+
+@login_required
+def view_response_phase02(request, id):
+    """Detailed view for a single Hackathon Phase 2 team and all its confirmed members."""
+    if not (
+        request.user.is_superuser
+        or Site_Permissions.user_has_permission(request.user, 'view_reg_response')
+        or Site_Permissions.user_has_permission(request.user, 'view_reg_responses_list')
+        or Site_Permissions.user_has_permission(request.user, 'reg_form_control')
+    ):
+        return render(request, "AccessDenied.html")
+
+    team = get_object_or_404(
+        HackathonTeam_Phase02.objects
+        .prefetch_related('members')
+        .select_related('phase1_team'),
+        id=id,
+    )
+    context = {
+        'team': team,
+        'members': team.members.all().order_by('member_order'),
+    }
+    return render(request, 'hackathon_team_response_phase02.html', context)
+
+
+@login_required
+@permission_required('reg_form_control')
+@require_POST
+def save_selected_phase02(request):
+    """Bulk updates is_payment_confirmed status for Hackathon Phase 2 teams."""
+    try:
+        data = json.loads(request.body)
+        raw_ids = data.get('selected_ids', [])
+        if not isinstance(raw_ids, list):
+            return JsonResponse(
+                {'message': 'selected_ids must be a list.', 'status': 'error'},
+                status=400,
+            )
+
+        selected_ids = [int(x) for x in raw_ids if str(x).isdigit()]
+
+        HackathonTeam_Phase02.objects.update(
+            is_payment_confirmed=Case(
+                When(id__in=selected_ids, then=Value(True)),
+                default=Value(False),
+                output_field=BooleanField(),
+            )
+        )
+        return JsonResponse(
+            {'message': 'Payment confirmations updated successfully!', 'status': 'success'}
+        )
+    except Exception as exc:
+        log_exception(exc, request)
+        return JsonResponse(
+            {'message': 'Error saving payment confirmations.', 'status': 'error'},
+            status=500,
+        )
+
+
+@login_required
+@permission_required('reg_form_control')
+@require_GET
+def download_excel_phase02(request):
+    """Exports Hackathon Phase 2 teams and members (including T-shirt sizes) as a 2-sheet Excel workbook."""
+    teams = (
+        HackathonTeam_Phase02.objects
+        .prefetch_related('members')
+        .select_related('phase1_team')
+        .all()
+        .order_by('created_at')
+    )
+
+    teams_data = []
+    members_data = []
+
+    for team in teams:
+        teams_data.append({
+            'Phase 2 ID': team.id,
+            'Phase 1 ID': team.phase1_team.id if team.phase1_team else '',
+            'Team Name': team.team_name,
+            'Team Size': team.team_size,
+            'Leader Email': team.leader_email,
+            'Leader Phone': team.leader_phone,
+            'Payment Method': team.payment_method,
+            'Sender Number': team.sender_number,
+            'Transaction ID': team.transaction_id,
+            'Payment Confirmed': 'Yes' if team.is_payment_confirmed else 'No',
+            'Comments': team.comments or '',
+            'Submitted At': team.created_at.astimezone().strftime('%Y-%m-%d %H:%M:%S'),
+        })
+
+        for member in team.members.all():
+            role = 'Team Leader' if member.is_leader else f'Member {member.member_order}'
+            members_data.append({
+                'Team ID': team.id,
+                'Team Name': team.team_name,
+                'Member Order': member.member_order,
+                'Role': role,
+                'Full Name': member.full_name,
+                'Email': member.email,
+                'Phone / WhatsApp': member.phone_number,
+                'University': member.university,
+                'Department': member.department,
+                'Academic Year': member.get_academic_year_display(),
+                'Student ID': member.student_id,
+                'Gender': member.get_gender_display() if member.gender else '',
+                'IEEE Member': 'Yes' if member.is_ieee_member else 'No',
+                'IEEE Membership No': member.ieee_membership_no,
+                'T-Shirt Size': member.tshirt_size,
+            })
+
+    output = BytesIO()
+    with pd.ExcelWriter(output, engine='openpyxl') as writer:
+        if teams_data:
+            pd.DataFrame(teams_data).to_excel(writer, index=False, sheet_name='Teams & Payments')
+        else:
+            pd.DataFrame({'Message': ['No Phase 2 hackathon teams registered yet']}).to_excel(
+                writer, index=False, sheet_name='Teams & Payments'
+            )
+
+        if members_data:
+            pd.DataFrame(members_data).to_excel(
+                writer, index=False, sheet_name='Members & T-Shirts'
+            )
+        else:
+            pd.DataFrame({'Message': ['No Phase 2 hackathon members registered yet']}).to_excel(
+                writer, index=False, sheet_name='Members & T-Shirts'
+            )
+
+    output.seek(0)
+    response = HttpResponse(
+        output.getvalue(),
+        content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    )
+    response['Content-Disposition'] = 'attachment; filename="hackathon_phase02_data.xlsx"'
     return response

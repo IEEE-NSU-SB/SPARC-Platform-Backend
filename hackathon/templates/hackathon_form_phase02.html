@@ -1,0 +1,809 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SPARC 2026 | Hackathon Phase 02 Finalization &amp; Payment</title>
+    <link rel="icon" href="{% static '/img/logo.gif' %}" />
+
+    <!-- DaisyUI -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/daisyui@5"
+      rel="stylesheet"
+      type="text/css"
+    />
+    <!-- Tailwind -->
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <!-- particles.js -->
+    <script src="{% static 'js/particles.min.js' %}"></script>
+
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Instrument+Sans:ital,wght@0,400..700;1,400..700&display=swap');
+
+      body {
+        background: transparent;
+        background-repeat: no-repeat;
+        background-size: cover;
+        position: relative;
+        z-index: 0;
+        font-family: "Instrument Sans", sans-serif;
+      }
+      .response_count {
+        font-size: larger;
+        border-bottom: 2px solid #19508e;
+        border-top: 1px solid #19508e;
+        border-left: 8px solid #19508e;
+        border-right: 1px solid #19508e;
+        padding: 4px 8px;
+        border-radius: 4px;
+        background: #c6e8ff;
+        color: #122812;
+      }
+      .custom-scrollbar::-webkit-scrollbar {
+        width: 5px;
+        height: 12px;
+      }
+      .custom-scrollbar::-webkit-scrollbar-track {
+        background: #a32d2d;
+        border-radius: 8px;
+      }
+      .custom-scrollbar::-webkit-scrollbar-thumb {
+        background: #e53232;
+        border-radius: 9999px;
+        cursor: pointer;
+      }
+      .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+        background: #00629B;
+      }
+      canvas {
+        display: block;
+        vertical-align: bottom;
+      }
+      #particles-js {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        background-color: #002855;
+        background-image: url("");
+        background-repeat: no-repeat;
+        background-size: 20%;
+        background-position: 50% 50%;
+      }
+      .input_label {
+        display: block;
+        font-size: 16px;
+        margin-bottom: 0.35rem;
+        color: #122812;
+      }
+      .input {
+        width: 100%;
+        padding: 0.55rem 0.85rem;
+        border: 1px solid #94a3b8;
+        border-radius: 0.375rem;
+        outline-style: none;
+        transition: all 0.3s ease-in-out;
+        background: #ffffff;
+        color: #0f172a;
+      }
+      .input:focus {
+        border-color: #00629B;
+        box-shadow: 0 0 0 3px #bfdff5;
+      }
+      .continue-btn {
+        color: white;
+        background: #00629B;
+        padding: 0.65rem 1.5rem;
+        border-radius: 0.375rem;
+        cursor: pointer;
+        border: 1px solid #00629B;
+        transition: all 0.3s ease-in-out;
+      }
+      .continue-btn:hover {
+        background: #d3e4f7;
+        color: #00629B;
+      }
+      .continue-btn:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+      }
+      .admin-btn {
+        color: white;
+        border: 1px solid #122812;
+        border-radius: 0.325rem;
+        background: #00629B;
+        padding: 0.25rem 0.85rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        font-size: 1.15rem;
+        transition: all 0.3s ease-in-out;
+        justify-content: center;
+      }
+      .admin-btn:hover {
+        background: #d3e4f7;
+        color: #00629B;
+      }
+      .section_heading {
+        text-align: center;
+        font-size: 1.5rem;
+        margin-bottom: 18px;
+        font-weight: 700;
+        color: #122812;
+      }
+      @media screen and (max-width: 500px) {
+        .response_count {
+          margin: 12px auto;
+        }
+        .admin-btn {
+          width: 100%;
+          font-size: 1rem;
+        }
+      }
+    </style>
+  </head>
+
+  <body class="py-2 custom-scrollbar min-h-screen">
+    <!-- Particles JS -->
+    <div id="particles-js" class="fixed inset-0 -z-10"></div>
+
+    <!-- Top Banner Image -->
+    <div class="w-11/12 md:w-3/5 mx-auto my-4">
+      <div class="rounded overflow-hidden shadow-[0px_0px_10px_#00629B] border-1 border-white flex justify-center max-md:h-40">
+        <img
+          src="{% static '/img/phase2.png' %}"
+          alt="SPARC 2026 Phase 02"
+          class="object-cover md:h-auto"
+        />
+      </div>
+    </div>
+
+    {% if is_staff_view or has_perm.reg_form_control or has_perm.view_reg_responses_list or user.is_staff or user.is_superuser %}
+    <!-- Small Thin Phase 2 Navigation Tab (Participants vs Hackathon) -->
+    <div class="w-11/12 md:w-3/5 mx-auto -mt-2 mb-3">
+      <div class="inline-flex p-1 rounded-lg bg-[#002855]/70 backdrop-blur-md border border-white/30 shadow-[0_2px_8px_rgba(0,0,0,0.25)] text-sm">
+        <a
+          href="{% if is_staff_view %}{% url 'registration:registration_admin_phase02' %}{% else %}{% url 'registration:registration_form_phase02' %}{% endif %}"
+          class="px-5 py-1.5 rounded-md font-semibold transition-all duration-200 text-white/80 hover:text-white hover:bg-white/10"
+        >
+          Participants
+        </a>
+        <a
+          href="{% if is_staff_view %}{% url 'hackathon:admin_phase02' %}{% else %}{% url 'hackathon:form_phase02' %}{% endif %}{% if token %}?token={{ token }}{% endif %}"
+          class="px-5 py-1.5 rounded-md font-semibold transition-all duration-200 bg-[#00629B] text-white shadow-sm"
+        >
+          Hackathon
+        </a>
+      </div>
+    </div>
+    {% endif %}
+
+    {% if has_perm.reg_form_control %}
+    <!-- Admin Feature Header Toolbar (matching phase2form.html) -->
+    <div class="rounded">
+      <div
+        class="bg-[#d3e4f7] w-11/12 md:w-3/5 mx-auto px-6 py-5"
+        style="
+          backdrop-filter: blur(7px);
+          border-radius: 4px 4px;
+          box-shadow: 0 2px 6px 0px #00000078;
+          position: relative;
+          top: 14px;"
+      >
+        <div
+          class="flex flex-col sm:flex-row sm:flex-wrap items-center md:justify-between items-start"
+        >
+          <div>
+            <!-- Publish Form Toggle -->
+            <label
+              class="inline-flex gap-2 px-0 py-2.5 rounded-md font-medium text-lg cursor-pointer"
+            >
+              <input
+                id="publishCheckbox"
+                type="checkbox"
+                {% if is_published %} checked="checked" {% endif %}
+                class="toggle border-gray-300 bg-gray-400 checked:border-[#00629B] checked:bg-[#D7F5BF] checked:text-[#00629B]"
+              />
+              {% if is_published %}
+              <span class="text-xl" style="color: #00629B" id="publishText">Form published!</span>
+              {% else %}
+              <span class="text-xl" style="color: rgb(207, 25, 18)" id="publishText">Publish Form?</span>
+              {% endif %}
+            </label>
+          </div>
+          <p class="response_count">
+            Response Count:
+            <span style="font-weight: bold">{{ registration_count }}</span> teams ({{ people_count }} people)
+          </p>
+        </div>
+
+        <div
+          class="flex flex-col sm:flex-row gap-3 items-center justify-center sm:justify-center w-full sm:w-auto my-3"
+        >
+          <!-- Download Excel Button -->
+          <a
+            href="{% url 'hackathon:download_excel_phase02' %}"
+            class="admin-btn"
+          >
+            <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24">
+              <path
+                d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z"
+              />
+            </svg>
+            <span>Download Excel Sheet</span>
+          </a>
+
+          {% if has_perm.view_qr_dashboard %}
+          <a
+            href="{% url 'core:dashboard' %}"
+            class="admin-btn"
+          >
+            <span>System Dashboard</span>
+          </a>
+          {% endif %}
+
+          {% if has_perm.view_reg_responses_list %}
+          <!-- See Responses Button -->
+          <a
+            href="{% url 'hackathon:response_table_phase02' %}"
+            class="admin-btn"
+          >
+            <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24">
+              <path
+                d="M19,3H5C3.89,3 3,3.89 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V5C21,3.89 20.1,3 19,3M19,19H5V5H19V19M17,17H7V15H17V17M17,13H7V11H17V13M17,9H7V7H17V9Z"
+              />
+            </svg>
+            <span>See Responses</span>
+          </a>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- Main Glassmorphic Card Container -->
+    <div
+      class="bg-[#d3e4f7] w-11/12 md:w-3/5 mx-auto"
+      style="
+        backdrop-filter: blur(7px);
+        border-radius: 4px 4px;
+        box-shadow: 0 2px 6px 0px #00000078;
+      "
+    >
+      {% if not is_staff_view and not is_published and not registration_closed %}
+      <div
+        class="p-6 bg-yellow-50 border border-yellow-300 rounded text-yellow-900 text-center"
+        style="margin-top: 18px"
+      >
+        <p class="font-semibold text-lg mb-2">Hackathon Phase 02 Registration is currently closed.</p>
+        <p>If you were selected for Phase 02, please check back once registration officially reopens or contact the organizers.</p>
+        <p class="mt-2 text-sm">
+          For any queries, contact:
+          <a href="mailto:ieeensusb.portal@gmail.com" style="color: #0b5ed7; text-decoration: none;">ieeensusb.portal@gmail.com</a>
+        </p>
+      </div>
+      {% elif not is_staff_view and registration_closed %}
+      <div class="p-6 bg-red-50 border border-red-300 rounded text-red-900 text-center" style="margin-top: 18px">
+        Registration is closed as we have reached the maximum capacity for Phase 02.
+      </div>
+      {% else %}
+
+      <!-- Phase 2 Form Wrapper -->
+      <form id="hackathonPhase2Form" class="p-6 md:p-8 space-y-8">
+        {% csrf_token %}
+        <input type="hidden" id="tokenInput" name="token" value="{{ token }}" />
+
+        <!-- Form Header -->
+        <header class="text-center border-b border-[#002855]/20 pb-5">
+          <h2 class="text-2xl md:text-3xl font-bold text-[#002855]">
+            Phase 02 &bull; IS AI COOKED? Hackathon Finalization
+          </h2>
+          <p class="text-sm md:text-base text-gray-700 mt-2 font-medium">
+            SPARC 2026 &bull; IEEE NSU Student Branch
+          </p>
+          <div class="inline-block mt-3 px-4 py-1.5 rounded-full bg-[#00629B]/10 border border-[#00629B]/30 text-[#00629B] font-semibold text-sm">
+            Selected Team Roster Verification, T-Shirt Sizes &amp; Payment
+          </div>
+        </header>
+
+        <!-- Instructions Callout -->
+        <div class="p-4 rounded-lg bg-blue-50/80 border border-blue-200 text-sm text-gray-800 leading-relaxed">
+          <p class="font-semibold text-[#002855] text-base mb-1">Welcome to Phase 02!</p>
+          <p>
+            Your team has been selected for Phase 02 of the <strong>IS AI COOKED? Hackathon</strong>.
+            Please verify your team roster below, select an accurate <strong>T-shirt size for each member</strong>, and complete the team registration fee payment via bKash or Nagad.
+          </p>
+        </div>
+
+        <!-- Section 1: Confirmed Team Profile -->
+        <section class="bg-white/80 rounded-xl p-5 md:p-6 shadow-sm border border-slate-200">
+          <h3 class="text-lg md:text-xl font-bold text-[#002855] mb-4 flex items-center gap-2">
+            <span class="w-7 h-7 rounded-full bg-[#00629B] text-white flex items-center justify-center text-sm">1</span>
+            Confirmed Team Profile
+          </h3>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+            <div class="p-3 bg-slate-50 rounded-lg border border-slate-200">
+              <span class="block text-xs uppercase tracking-wider text-slate-500 font-bold">Team Name</span>
+              <span class="text-base font-semibold text-[#002855]">{{ team.team_name|default:"Sample Team Preview" }}</span>
+            </div>
+            <div class="p-3 bg-slate-50 rounded-lg border border-slate-200">
+              <span class="block text-xs uppercase tracking-wider text-slate-500 font-bold">Team Size</span>
+              <span class="text-base font-semibold text-[#002855]">{{ team.team_size|default:3 }} Members</span>
+            </div>
+            <div class="p-3 bg-slate-50 rounded-lg border border-slate-200">
+              <span class="block text-xs uppercase tracking-wider text-slate-500 font-bold">Team Leader Email</span>
+              <span class="text-base font-semibold text-[#002855]">{{ team.leader_email|default:"leader@example.com" }}</span>
+            </div>
+            <div class="p-3 bg-slate-50 rounded-lg border border-slate-200">
+              <span class="block text-xs uppercase tracking-wider text-slate-500 font-bold">Team Leader Phone</span>
+              <span class="text-base font-semibold text-[#002855]">{{ team.leader_phone|default:"01XXXXXXXXX" }}</span>
+            </div>
+          </div>
+        </section>
+
+        <!-- Section 2: Member Roster & T-Shirt Selection -->
+        <section class="bg-white/80 rounded-xl p-5 md:p-6 shadow-sm border border-slate-200 space-y-6">
+          <h3 class="text-lg md:text-xl font-bold text-[#002855] mb-2 flex items-center gap-2">
+            <span class="w-7 h-7 rounded-full bg-[#00629B] text-white flex items-center justify-center text-sm">2</span>
+            Member Details &amp; T-Shirt Size Selection
+          </h3>
+          <p class="text-xs md:text-sm text-slate-600 mb-4">
+            Each team member will receive an official SPARC 2026 Hackathon Kit. Please select the correct T-shirt size for each person.
+          </p>
+
+          {% if members %}
+            {% for member in members %}
+            <div class="p-4 rounded-lg border border-slate-300 bg-slate-50/70 space-y-3">
+              <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-200 pb-2">
+                <span class="font-bold text-[#002855] text-base">
+                  {% if member.is_leader %}
+                    Team Leader &bull; Member 1
+                  {% else %}
+                    Member {{ member.member_order }}
+                  {% endif %}
+                </span>
+                <span class="text-xs px-2.5 py-0.5 rounded font-semibold {% if member.is_ieee_member %}bg-blue-100 text-blue-800{% else %}bg-slate-200 text-slate-700{% endif %}">
+                  {% if member.is_ieee_member %}IEEE Member{% else %}Non-IEEE{% endif %}
+                </span>
+              </div>
+
+              <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 text-xs md:text-sm text-slate-700">
+                <div>
+                  <span class="text-slate-500 block text-xs">Full Name:</span>
+                  <span class="font-semibold text-slate-900">{{ member.full_name }}</span>
+                </div>
+                <div>
+                  <span class="text-slate-500 block text-xs">Email:</span>
+                  <span class="font-semibold text-slate-900">{{ member.email }}</span>
+                </div>
+                <div>
+                  <span class="text-slate-500 block text-xs">University:</span>
+                  <span class="font-semibold text-slate-900">{{ member.university }}</span>
+                </div>
+                <div>
+                  <span class="text-slate-500 block text-xs">Department:</span>
+                  <span class="font-semibold text-slate-900">{{ member.department }}</span>
+                </div>
+                <div>
+                  <span class="text-slate-500 block text-xs">Student ID:</span>
+                  <span class="font-semibold text-slate-900">{{ member.student_id }}</span>
+                </div>
+                <div>
+                  <span class="text-slate-500 block text-xs">Contact No:</span>
+                  <span class="font-semibold text-slate-900">{{ member.phone_number }}</span>
+                </div>
+              </div>
+
+              <!-- T-Shirt Dropdown for This Member -->
+              <div class="pt-3 border-t border-slate-200">
+                <label for="tshirt_size_{{ member.id }}" class="input_label font-semibold text-sm">
+                  Select T-Shirt Size for <span class="text-[#00629B]">{{ member.full_name }}</span> <span class="text-red-600">*</span>
+                </label>
+                <select
+                  id="tshirt_size_{{ member.id }}"
+                  name="tshirt_size_{{ member.id }}"
+                  data-member-id="{{ member.id }}"
+                  data-member-order="{{ member.member_order }}"
+                  data-member-name="{{ member.full_name }}"
+                  class="input member-tshirt-select cursor-pointer max-w-md"
+                  required
+                >
+                  <option value="" disabled selected>-- Choose T-Shirt Size --</option>
+                  <option value="S">Small (S)</option>
+                  <option value="M">Medium (M)</option>
+                  <option value="L">Large (L)</option>
+                  <option value="XL">Extra Large (XL)</option>
+                  <option value="2XL">Double Extra Large (2XL)</option>
+                  <option value="3XL">Triple Extra Large (3XL)</option>
+                </select>
+              </div>
+            </div>
+            {% endfor %}
+          {% else %}
+            <!-- Fallback/Preview when in admin view without populated members -->
+            <div class="p-4 rounded-lg border border-slate-300 bg-slate-50/70 space-y-3">
+              <p class="text-sm text-slate-600 italic">Preview Mode: No live team members attached to this view. Standard Phase 2 form will dynamically display 2 or 3 member cards based on the selected team size.</p>
+            </div>
+          {% endif %}
+        </section>
+
+        <!-- Section 3: Payment Details -->
+        <section class="bg-white/80 rounded-xl p-5 md:p-6 shadow-sm border border-slate-200 space-y-5">
+          <h3 class="text-lg md:text-xl font-bold text-[#002855] flex items-center gap-2">
+            <span class="w-7 h-7 rounded-full bg-[#00629B] text-white flex items-center justify-center text-sm">3</span>
+            Team Payment Information
+          </h3>
+
+          <!-- Payment Instructions Box -->
+          <div class="p-4 rounded-lg bg-amber-50 border border-amber-300 text-amber-900 text-sm leading-relaxed space-y-2">
+            <h4 class="font-bold text-base text-amber-950 flex items-center gap-2">
+              Payment Guidelines (Team Fee)
+            </h4>
+            <p>
+              Please send the team registration fee using <strong>Send Money</strong> or <strong>Merchant Payment</strong> to our official wallet number:
+            </p>
+            <div class="p-2.5 bg-amber-100/70 rounded-md font-mono text-base font-bold text-amber-950 flex flex-wrap items-center justify-between">
+              <span>bKash / Nagad Wallet: <span class="text-red-700">01309570567</span></span>
+              <span class="text-xs font-normal text-amber-800">Reference: Team Name</span>
+            </div>
+            <p class="text-xs text-amber-800">
+              <strong>Notice:</strong> Keep your SMS confirmation handy. You must provide the exact Transaction ID (TrxID) and sender number below.
+            </p>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <!-- Payment Method -->
+            <div>
+              <label class="input_label font-semibold" for="paymentMethodSelect">
+                Payment Method <span class="text-red-600">*</span>
+              </label>
+              <select id="paymentMethodSelect" name="payment_method" class="input cursor-pointer" required>
+                <option value="Bkash" selected>bKash</option>
+                <option value="Nagad">Nagad</option>
+              </select>
+            </div>
+
+            <!-- Sender Phone Number -->
+            <div>
+              <label class="input_label font-semibold" for="senderNumberInput">
+                Sender Wallet Number <span class="text-red-600">*</span>
+              </label>
+              <input
+                type="tel"
+                id="senderNumberInput"
+                name="sender_number"
+                placeholder="01XXXXXXXXX"
+                class="input"
+                pattern="^(?:\+?88)?01[3-9]\d{8}$"
+                required
+              />
+              <span class="text-xs text-slate-500 mt-1 block">11-digit Bangladeshi mobile wallet number</span>
+            </div>
+          </div>
+
+          <!-- Transaction ID -->
+          <div>
+            <label class="input_label font-semibold" for="transactionIdInput">
+              Transaction ID (TrxID) <span class="text-red-600">*</span>
+            </label>
+            <input
+              type="text"
+              id="transactionIdInput"
+              name="transaction_id"
+              placeholder="e.g. BL92A87XKZ"
+              class="input uppercase tracking-wider font-mono"
+              required
+            />
+            <span class="text-xs text-slate-500 mt-1 block">Provided in the bKash/Nagad confirmation SMS</span>
+          </div>
+
+          <!-- Comments -->
+          <div>
+            <label class="input_label font-semibold" for="commentsInput">
+              Additional Comments / Notes (Optional)
+            </label>
+            <textarea
+              id="commentsInput"
+              name="comments"
+              rows="2"
+              placeholder="Any special remarks or instructions"
+              class="input"
+            ></textarea>
+          </div>
+        </section>
+
+        <!-- Submit Button -->
+        <div class="pt-2">
+          <button
+            type="submit"
+            id="submitBtn"
+            class="continue-btn w-full text-center text-lg font-bold py-3 shadow-md"
+          >
+            Submit Phase 02 Finalization &rarr;
+          </button>
+        </div>
+      </form>
+      {% endif %}
+    </div>
+
+    {% if is_staff_view %}
+    <!-- Publish Modal (staff only) -->
+    <div
+      id="publishModal"
+      class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/50"
+    >
+      <div class="bg-white p-6 rounded-lg shadow-lg text-center max-w-sm w-full mx-4">
+        <h3 class="text-lg font-bold text-gray-800 mb-2">Publish Hackathon Phase 02 Form</h3>
+        <p class="text-sm text-gray-600 mb-6">
+          Are you sure you want to publish the form? Selected participants with valid tokens will be able to submit their Phase 02 details.
+        </p>
+        <div class="flex justify-center gap-4">
+          <button
+            id="cancelPublish"
+            class="px-4 py-2 bg-gray-300 text-gray-800 rounded hover:bg-gray-400 font-semibold text-sm"
+          >
+            Cancel
+          </button>
+          <button
+            id="confirmPublish"
+            class="px-4 py-2 bg-[#00629B] text-white rounded hover:bg-[#004c7a] font-semibold text-sm"
+          >
+            Yes, Publish
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Unpublish Modal (staff only) -->
+    <div
+      id="unpublishModal"
+      class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/50"
+    >
+      <div class="bg-white p-6 rounded-lg shadow-lg text-center max-w-sm w-full mx-4">
+        <h3 class="text-lg font-bold text-gray-800 mb-2">Unpublish Hackathon Phase 02 Form</h3>
+        <p class="text-sm text-gray-600 mb-6">
+          Are you sure you want to unpublish the form? New submissions will be paused.
+        </p>
+        <div class="flex justify-center gap-4">
+          <button
+            id="cancelUnpublish"
+            class="px-4 py-2 bg-gray-300 text-gray-800 rounded hover:bg-gray-400 font-semibold text-sm"
+          >
+            Cancel
+          </button>
+          <button
+            id="confirmUnpublish"
+            class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 font-semibold text-sm"
+          >
+            Yes, Unpublish
+          </button>
+        </div>
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- Client-side Logic Script -->
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        // 1. Initialize Particles Background
+        if (typeof particlesJS === "function" && document.getElementById("particles-js")) {
+          particlesJS("particles-js", {
+            particles: {
+              number: { value: 40 },
+              color: { value: "#ffffff" },
+              size: { value: 3 },
+              move: { speed: 1 },
+            },
+          });
+        }
+
+        const form = document.getElementById("hackathonPhase2Form");
+        const submitBtn = document.getElementById("submitBtn");
+        const tokenInput = document.getElementById("tokenInput");
+
+        if (form && submitBtn) {
+          form.addEventListener("submit", async function (e) {
+            e.preventDefault();
+
+            const token = tokenInput ? tokenInput.value.trim() : "";
+            if (!token) {
+              Swal.fire({
+                icon: "error",
+                title: "Missing Token",
+                text: "No valid token was found for this submission.",
+              });
+              return;
+            }
+
+            // Gather and validate T-shirt selections for all member dropdowns
+            const tshirtSelects = form.querySelectorAll(".member-tshirt-select");
+            const memberTshirts = {};
+            let missingTshirt = false;
+            let missingName = "";
+
+            tshirtSelects.forEach((select) => {
+              const memberId = select.dataset.memberId;
+              const memberName = select.dataset.memberName || "Team Member";
+              const val = select.value.trim();
+
+              if (!val) {
+                missingTshirt = true;
+                if (!missingName) missingName = memberName;
+              } else {
+                memberTshirts[memberId] = val;
+              }
+            });
+
+            if (missingTshirt) {
+              Swal.fire({
+                icon: "warning",
+                title: "T-Shirt Size Required",
+                text: `Please select a T-shirt size for ${missingName}.`,
+              });
+              return;
+            }
+
+            // Validate sender phone and transaction ID
+            const paymentMethod = document.getElementById("paymentMethodSelect").value;
+            const senderNumber = document.getElementById("senderNumberInput").value.trim();
+            const transactionId = document.getElementById("transactionIdInput").value.trim();
+            const comments = document.getElementById("commentsInput") ? document.getElementById("commentsInput").value.trim() : "";
+
+            if (!senderNumber || !/^(?:\+?88)?01[3-9]\d{8}$/.test(senderNumber.replace(/[\s\-]/g, ""))) {
+              Swal.fire({
+                icon: "warning",
+                title: "Invalid Phone Number",
+                text: "Please enter a valid 11-digit Bangladeshi mobile wallet number.",
+              });
+              return;
+            }
+
+            if (!transactionId || transactionId.length < 4) {
+              Swal.fire({
+                icon: "warning",
+                title: "Invalid Transaction ID",
+                text: "Please enter a valid Transaction ID from your payment SMS.",
+              });
+              return;
+            }
+
+            // Confirm submission
+            const confirmResult = await Swal.fire({
+              title: "Confirm Phase 02 Submission?",
+              text: "Please verify that the T-shirt sizes and payment Transaction ID are correct. Once submitted, changes cannot be made online.",
+              icon: "question",
+              showCancelButton: true,
+              confirmButtonColor: "#00629B",
+              cancelButtonColor: "#64748b",
+              confirmButtonText: "Yes, Submit Phase 02",
+              cancelButtonText: "Review Details",
+            });
+
+            if (!confirmResult.isConfirmed) {
+              return;
+            }
+
+            submitBtn.disabled = true;
+            const originalBtnText = submitBtn.innerHTML;
+            submitBtn.innerHTML = "Submitting Phase 02...";
+
+            const payload = {
+              token: token,
+              payment_method: paymentMethod,
+              sender_number: senderNumber,
+              transaction_id: transactionId,
+              comments: comments,
+              member_tshirts: memberTshirts,
+            };
+
+            try {
+              const response = await fetch("{% url 'hackathon:submit_phase02' %}", {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                  "X-CSRFToken": "{{ csrf_token }}",
+                },
+                body: JSON.stringify(payload),
+              });
+
+              const data = await response.json();
+
+              if (response.ok && data.success) {
+                await Swal.fire({
+                  icon: "success",
+                  title: "Registration Submitted!",
+                  text: data.message || "Your Phase 02 details and payment have been recorded. Confirmation emails have been dispatched to all team members.",
+                  confirmButtonColor: "#00629B",
+                });
+                window.location.href = "{% url 'core:index' %}";
+              } else {
+                Swal.fire({
+                  icon: "error",
+                  title: "Submission Failed",
+                  text: data.message || "Please check your inputs and try again.",
+                });
+              }
+            } catch (err) {
+              console.error("Submission error:", err);
+              Swal.fire({
+                icon: "error",
+                title: "Network Error",
+                text: "Failed to connect to the server. Please check your internet connection.",
+              });
+            } finally {
+              submitBtn.disabled = false;
+              submitBtn.innerHTML = originalBtnText;
+            }
+          });
+        }
+
+        // Staff Publish Toggles
+        {% if is_staff_view %}
+        const publishToggle = document.getElementById("publishCheckbox");
+        const publishText = document.getElementById("publishText");
+
+        if (publishToggle) {
+          publishToggle.addEventListener("change", function () {
+            if (publishToggle.checked) {
+              document.getElementById("publishModal").classList.remove("hidden");
+            } else {
+              document.getElementById("unpublishModal").classList.remove("hidden");
+            }
+          });
+
+          // Confirm Publish
+          document.getElementById("confirmPublish").addEventListener("click", function () {
+            document.getElementById("publishModal").classList.add("hidden");
+            fetch("{% url 'hackathon:toggle_publish_phase02' %}", {
+              method: "POST",
+              headers: {
+                "X-CSRFToken": "{{ csrf_token }}",
+                "Content-Type": "application/json",
+              },
+            })
+              .then((res) => res.json())
+              .then((data) => {
+                publishToggle.checked = data.is_published;
+                publishText.textContent = data.is_published ? "Form published!" : "Publish Form?";
+                publishText.style.color = data.is_published ? "#00629B" : "#cf1912";
+              })
+              .catch((err) => alert("Failed to toggle publish: " + err.message));
+          });
+
+          document.getElementById("cancelPublish").addEventListener("click", function () {
+            document.getElementById("publishModal").classList.add("hidden");
+            publishToggle.checked = false;
+          });
+
+          // Confirm Unpublish
+          document.getElementById("confirmUnpublish").addEventListener("click", function () {
+            document.getElementById("unpublishModal").classList.add("hidden");
+            fetch("{% url 'hackathon:toggle_publish_phase02' %}", {
+              method: "POST",
+              headers: {
+                "X-CSRFToken": "{{ csrf_token }}",
+                "Content-Type": "application/json",
+              },
+            })
+              .then((res) => res.json())
+              .then((data) => {
+                publishToggle.checked = data.is_published;
+                publishText.textContent = data.is_published ? "Form published!" : "Publish Form?";
+                publishText.style.color = data.is_published ? "#00629B" : "#cf1912";
+              })
+              .catch((err) => alert("Failed to toggle publish: " + err.message));
+          });
+
+          document.getElementById("cancelUnpublish").addEventListener("click", function () {
+            document.getElementById("unpublishModal").classList.add("hidden");
+            publishToggle.checked = true;
+          });
+        }
+        {% endif %}
+      });
+    </script>
+  </body>
+</html>
