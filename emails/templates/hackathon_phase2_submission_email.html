@@ -1,0 +1,89 @@
+<div>
+  <!-- Centering table -->
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#f4f4f6;padding:20px 0;">
+    <tr>
+      <td align="center">
+        <!-- Container -->
+        <table role="presentation" width="600" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:8px;overflow:hidden;box-shadow:0 2px 6px rgba(0,0,0,0.08);">
+          <!-- Header -->
+          <tr>
+            <td style="background:linear-gradient(135deg, #00629B 0%, #004c7a 50%, #003d61 100%);padding:30px 24px 20px 24px;color:#ffffff;text-align:center;">
+              {% if banner_image_url %}
+              <img src="{{ banner_image_url }}" alt="SPARC 2026 Logo" style="max-width:250px;height:auto;margin-bottom:16px;display:block;margin-left:auto;margin-right:auto;" />
+              {% endif %}
+              <h1 style="margin:0;font-size:20px;line-height:1.2;">Phase 02 Registration &amp; Payment Received!</h1>
+              <p style="margin:6px 0 0 0;font-size:14px;color:#e0f2fe;">SPARC 2026 &bull; IS AI COOKED? Hackathon</p>
+            </td>
+          </tr>
+
+          <!-- Body -->
+          <tr>
+            <td style="padding:24px;color:#1f2937;">
+              <p style="margin:0 0 14px 0;font-size:15px;">Dear {{ recipient_name }},</p>
+
+              <p style="margin:0 0 14px 0;font-size:15px;line-height:1.5;">
+                We are pleased to confirm that the Phase 02 finalization and payment details for your team, <strong>{{ team.team_name }}</strong>, have been successfully received!
+              </p>
+
+              <!-- Payment Summary Box -->
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #d1fae5;border-radius:6px;background:#ecfdf5;margin:18px 0;">
+                <tr>
+                  <td style="padding:16px;">
+                    <h3 style="margin:0 0 10px 0;font-size:16px;color:#065f46;">Submission Summary</h3>
+                    <p style="margin:4px 0;font-size:14px;"><strong>Team Name:</strong> {{ team.team_name }}</p>
+                    <p style="margin:4px 0;font-size:14px;"><strong>Payment Method:</strong> {{ team.payment_method }}</p>
+                    <p style="margin:4px 0;font-size:14px;"><strong>Transaction ID:</strong> <span style="font-family:monospace;font-weight:bold;color:#0f766e;">{{ team.transaction_id }}</span></p>
+                    <p style="margin:4px 0 0 0;font-size:14px;"><strong>Status:</strong> <span style="display:inline-block;padding:2px 8px;border-radius:9999px;font-size:12px;font-weight:bold;background:#fef3c7;color:#92400e;">Payment Verification in Progress</span></p>
+                  </td>
+                </tr>
+              </table>
+
+              <p style="margin:0 0 14px 0;font-size:15px;line-height:1.5;color:#1f2937;">
+                Our finance and registration desk will verify the transaction details. Once verified, <strong>each member of your team will individually receive their personalized event QR code badge</strong> via email.
+              </p>
+
+              <!-- What's next box -->
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #e6e9ef;border-radius:6px;background:#fbfdff;margin-bottom:18px;">
+                <tr>
+                  <td style="padding:16px;">
+                    <h3 style="margin:0 0 8px 0;font-size:15px;color:#002855;">What to Expect Next:</h3>
+                    <ul style="margin:0;padding-left:20px;font-size:14px;line-height:1.6;color:#374151;">
+                      <li>Payment verification by our finance officers</li>
+                      <li>Individual QR codes emailed to every team member</li>
+                      <li>Event day check-in, goodies, and food pass distribution via your QR code</li>
+                    </ul>
+                  </td>
+                </tr>
+              </table>
+
+              <hr style="border:none;border-top:1px solid #e6e9ef;margin:20px 0;">
+
+              <p style="margin:0 0 6px 0;font-size:14px;color:#374151;">
+                Get ready to build, innovate, and test if AI is truly cooked!
+              </p>
+
+              <p style="margin:12px 0 0 0;font-size:14px;color:#374151;">
+                Best regards,<br>
+                <strong>SPARC 2026 Organizing Committee</strong><br>
+                IEEE NSU Student Branch
+              </p>
+
+              <p style="margin:12px 0 0 0;font-size:13px;color:#6b7280;">
+                For queries or payment concerns, contact <a href="mailto:ieeensusb.portal@gmail.com" style="color:#0b5ed7;text-decoration:none;">ieeensusb.portal@gmail.com</a>
+              </p>
+            </td>
+          </tr>
+
+          <!-- Footer -->
+          <tr>
+            <td style="background:#f8fafc;padding:16px 24px;color:#6b7280;font-size:13px;">
+              <p style="margin:0;">IEEE NSU SB &bull; North South University</p>
+              <p style="margin:6px 0 0 0;">This email was sent to all team members registered under team "{{ team.team_name }}" for SPARC 2026.</p>
+            </td>
+          </tr>
+        </table>
+        <!-- End container -->
+      </td>
+    </tr>
+  </table>
+</div>

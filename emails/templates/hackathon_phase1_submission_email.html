@@ -1,0 +1,106 @@
+<div>
+  <!-- Centering table -->
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#f4f4f6;padding:20px 0;">
+    <tr>
+      <td align="center">
+        <!-- Container -->
+        <table role="presentation" width="600" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:8px;overflow:hidden;box-shadow:0 2px 6px rgba(0,0,0,0.08);">
+          <!-- Header -->
+          <tr>
+            <td style="background:linear-gradient(135deg, #00629B 0%, #004c7a 50%, #003d61 100%);padding:30px 24px 20px 24px;color:#ffffff;text-align:center;">
+              {% if banner_image_url %}
+              <img src="{{ banner_image_url }}" alt="SPARC 2026 Logo" style="max-width:250px;height:auto;margin-bottom:16px;display:block;margin-left:auto;margin-right:auto;" />
+              {% endif %}
+              <h1 style="margin:0;font-size:20px;line-height:1.2;">SPARC 2026 &bull; IS AI COOKED? Hackathon</h1>
+              <p style="margin:6px 0 0 0;font-size:14px;color:#e0f2fe;">Phase 01 Team Registration Received</p>
+            </td>
+          </tr>
+
+          <!-- Body -->
+          <tr>
+            <td style="padding:24px;color:#1f2937;">
+              <p style="margin:0 0 14px 0;font-size:15px;">Dear {{ recipient_name }},</p>
+
+              <p style="margin:0 0 14px 0;font-size:15px;line-height:1.5;">
+                Thank you for registering your team for <strong>Phase 01 of the IS AI COOKED? Hackathon</strong> at <strong>SPARC 2026</strong>, organized by the <strong>IEEE NSU Student Branch</strong>.
+              </p>
+
+              <p style="margin:0 0 14px 0;font-size:15px;line-height:1.5;">
+                We have successfully recorded the Phase 01 submission submitted on behalf of your team. Our technical committee is currently reviewing team profiles, compositions, and registrations.
+              </p>
+
+              <!-- Team details box -->
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #e6e9ef;border-radius:6px;background:#fbfdff;margin:18px 0;">
+                <tr>
+                  <td style="padding:16px;">
+                    <h3 style="margin:0 0 10px 0;font-size:16px;color:#002855;">Registered Team Profile</h3>
+                    <p style="margin:6px 0;font-size:14px;"><strong>Team Name:</strong> {{ team.team_name }}</p>
+                    <p style="margin:6px 0;font-size:14px;"><strong>Team Size:</strong> {{ team.team_size }} Members</p>
+                    <p style="margin:6px 0;font-size:14px;"><strong>Team Leader:</strong> {{ team.leader.full_name|default:team.leader_signature }} ({{ team.leader_email }})</p>
+                    <p style="margin:6px 0 0 0;font-size:14px;"><strong>University Mode:</strong> {{ team.get_university_distribution_display }}</p>
+                  </td>
+                </tr>
+              </table>
+
+              <p style="margin:0 0 14px 0;font-size:15px;line-height:1.5;color:#bb7e0f;">
+                <strong>Next Step:</strong> Teams selected after reviewing Phase 01 responses will receive a <strong>Phase 02 invitation email</strong> sent to your Team Leader with instructions to confirm member details, select T-shirt sizes, and complete the team registration fee payment.
+              </p>
+
+              <p style="margin:0 0 18px 0;font-size:15px;">
+                Keep an eye on your inboxes and follow the Official Facebook page of the IEEE NSU Student Branch for updates and announcements.
+              </p>
+
+              <!-- Event details box -->
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #e6e9ef;border-radius:6px;background:#fbfdff;">
+                <tr>
+                  <td style="padding:16px;">
+                    <h3 style="margin:0 0 8px 0;font-size:16px;color:#002855;">Event Details</h3>
+                    <p style="margin:6px 0;font-size:14px;"><strong>Event:</strong> SPARC 2026 &mdash; IS AI COOKED? Hackathon</p>
+                    <p style="margin:6px 0;font-size:14px;"><strong>Organizer:</strong> IEEE NSU Student Branch</p>
+                    <p style="margin:6px 0 0 0;font-size:14px;"><strong>Venue:</strong> North South University</p>
+                  </td>
+                </tr>
+              </table>
+
+              <!-- CTA buttons -->
+              <table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="margin-top:18px;">
+                <tr>
+                  <td align="left">
+                    <a href="https://www.facebook.com/ieeensusb" 
+                      style="display:inline-block;padding:10px 16px;text-decoration:none;background:#00629B;color:#ffffff;border-radius:6px;font-size:14px;margin-right:8px;margin-bottom:8px;" 
+                      target="_blank" rel="noopener noreferrer">Official Facebook Page</a>
+                  </td>
+                </tr>
+              </table>
+
+              <hr style="border:none;border-top:1px solid #e6e9ef;margin:20px 0;">
+
+              <p style="margin:0 0 6px 0;font-size:14px;color:#374151;">
+                We look forward to seeing your team in action at SPARC 2026!
+              </p>
+
+              <p style="margin:12px 0 0 0;font-size:14px;color:#374151;">
+                Best regards,<br>
+                <strong>SPARC 2026 Hackathon Team</strong><br>
+                IEEE NSU Student Branch
+              </p>
+
+              <p style="margin:12px 0 0 0;font-size:13px;color:#6b7280;">
+                For any queries, reach out to <a href="mailto:ieeensusb.portal@gmail.com" style="color:#0b5ed7;text-decoration:none;">ieeensusb.portal@gmail.com</a>
+              </p>
+            </td>
+          </tr>
+
+          <!-- Footer -->
+          <tr>
+            <td style="background:#f8fafc;padding:16px 24px;color:#6b7280;font-size:13px;">
+              <p style="margin:0;">IEEE NSU SB &bull; North South University</p>
+              <p style="margin:6px 0 0 0;">This email was sent to all team members registered under team "{{ team.team_name }}" for SPARC 2026.</p>
+            </td>
+          </tr>
+        </table>
+        <!-- End container -->
+      </td>
+    </tr>
+  </table>
+</div>

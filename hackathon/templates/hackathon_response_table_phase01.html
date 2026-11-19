@@ -97,6 +97,7 @@
       id="hackathonResponseRoot"
       class="relative w-11/12 max-w-7xl mx-auto py-10 z-10"
       data-save-selected-url="{% url 'hackathon:save_selected_phase01' %}"
+      data-send-phase02-email-url="{% url 'hackathon:send_phase02_email' %}"
       data-csrf-token="{{ csrf_token }}"
     >
       <!-- Header -->
@@ -165,11 +166,9 @@
           <button
             type="button"
             id="sendMailBtn"
-            disabled
-            title="Hackathon Phase 2 payment email dispatch will be enabled once Phase 2 details are configured."
-            class="px-5 py-2 max-md:w-full bg-[#1b5c4a]/50 text-white/70 rounded-lg border-2 border-white/30 cursor-not-allowed"
+            class="px-5 py-2 max-md:w-full bg-[#1b5c4a] text-white rounded-lg shadow hover:bg-[#009b55] border-2 border-white/70 transition-all duration-300 ease-in-out"
           >
-            Send Phase-2 Email (Phase 2 Pending)
+            Send Phase-2 Email
           </button>
         </div>
         {% endif %}
@@ -397,10 +396,12 @@
         if (!root) return;
 
         const saveSelectedUrl = "{% url 'hackathon:save_selected_phase01' %}";
+        const sendPhase02EmailUrl = "{% url 'hackathon:send_phase02_email' %}";
         const csrfToken = "{{ csrf_token }}";
         const searchInput = document.getElementById("tableSearch");
         const selectAllBtn = document.getElementById("selectAllBtn");
         const saveBtn = document.getElementById("saveBtn");
+        const sendMailBtn = document.getElementById("sendMailBtn");
 
         // 2. Deep Cross-Member Live Search Filter
         if (searchInput) {
@@ -488,6 +489,47 @@
             } finally {
               saveBtn.disabled = false;
               saveBtn.textContent = originalText;
+            }
+          });
+        }
+
+        // 6. Send Phase-2 Email Action
+        if (sendMailBtn && sendPhase02EmailUrl) {
+          sendMailBtn.addEventListener("click", async function () {
+            if (
+              !confirm(
+                "Phase-2 invitation emails will be sent to the Team Leaders of all selected teams now. Are you sure?"
+              )
+            ) {
+              return;
+            }
+
+            sendMailBtn.disabled = true;
+            const originalText = sendMailBtn.textContent;
+            sendMailBtn.textContent = "Sending...";
+
+            try {
+              const response = await fetch(sendPhase02EmailUrl, {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                  "X-CSRFToken": csrfToken,
+                },
+              });
+
+              const data = await response.json();
+              if (response.ok && data.status === "success") {
+                alert(data.message || "Successfully emailed to selected team leaders!");
+                window.location.reload();
+              } else {
+                alert(data.message || "Failed to send Phase-2 emails.");
+              }
+            } catch (err) {
+              console.error("Error sending Phase-2 emails:", err);
+              alert("Network error while sending Phase-2 emails.");
+            } finally {
+              sendMailBtn.disabled = false;
+              sendMailBtn.textContent = originalText;
             }
           });
         }

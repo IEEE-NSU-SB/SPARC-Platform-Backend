@@ -19,6 +19,11 @@ from django.core.files.base import ContentFile
 from django.template.loader import render_to_string
 from core.models import Registered_Participant
 from registration.models import Form_Participant_Phase_1, Form_Participant_Unique_Code_Phase_2
+from hackathon.models import (
+    HackathonTeam_Phase01,
+    HackathonTeam_Unique_Code_Phase_2,
+    HackathonTeam_Phase02,
+)
 from spac_platform import settings
 from django.contrib import messages
 from django.shortcuts import render
@@ -285,6 +290,182 @@ def send_participant_phase02_email(request, form_participants):
                 print(f'Sending email to {form_participant.id} FAILED!')
 
     return JsonResponse({'message':'success'})
+
+def send_hackathon_email_phase01(request, team):
+    """
+    Sends Phase 01 registration acknowledgement email to ALL members of the hackathon team.
+    """
+    credentials = get_credentials()
+    if not credentials:
+        print("Google Mail API credentials not found or invalid.")
+        return JsonResponse({'message': 'Please re-authorise google api'})
+    try:
+        service = build(settings.GOOGLE_MAIL_API_NAME, settings.GOOGLE_MAIL_API_VERSION, credentials=credentials)
+        scheme = "https" if request.is_secure() else "http"
+        banner_image_url = f"{scheme}://{request.get_host()}/media_files/SPAC25LogoMin.png"
+
+        members = team.members.all()
+        for member in members:
+            if not member.email:
+                continue
+            try:
+                message = MIMEMultipart()
+                message["From"] = "IEEE NSU SB Portal <ieeensusb.portal@gmail.com>"
+                message["To"] = str(member.email).strip()
+                message["Subject"] = f"SPARC 2026 - Hackathon Phase 01 Registration Received - {team.team_name}"
+
+                context = {
+                    'recipient_name': member.full_name,
+                    'team': team,
+                    'member': member,
+                    'banner_image_url': banner_image_url,
+                }
+                html_content = render_to_string('hackathon_phase1_submission_email.html', context)
+                message.attach(MIMEText(html_content, 'html'))
+
+                encoded_message = base64.urlsafe_b64encode(message.as_bytes()).decode()
+                create_message = {"raw": encoded_message}
+
+                send_message = (
+                    service.users()
+                    .messages()
+                    .send(userId="me", body=create_message)
+                    .execute()
+                )
+                print(f'Hackathon Phase 1 email sent to {member.email}, message Id: {send_message.get("id")}')
+                sleep(1)
+            except Exception as e:
+                print(f'Failed sending Hackathon Phase 1 email to {member.email}: {e}')
+                log_exception(e, request)
+
+        return JsonResponse({'message': 'success'})
+    except Exception as e:
+        print(f"send_hackathon_email_phase01 error: {e}")
+        log_exception(e, request)
+        return JsonResponse({'message': 'error'})
+
+def send_hackathon_phase02_email(request, selected_teams):
+    """
+    Sends Phase 02 acceptance & finalization invitation email ONLY to the Team Leader of selected teams.
+    Generates a unique single-use token link for each team.
+    """
+    credentials = get_credentials()
+    if not credentials:
+        return JsonResponse({'message': 'Please re-authorise google api', 'status': 'error'})
+
+    try:
+        service = build(settings.GOOGLE_MAIL_API_NAME, settings.GOOGLE_MAIL_API_VERSION, credentials=credentials)
+        scheme = "https" if request.is_secure() else "http"
+        banner_image_url = f"{scheme}://{request.get_host()}/media_files/SPAC25LogoMin.png"
+
+        sent_count = 0
+        for team in selected_teams:
+            if not team.is_phase_2_email_sent:
+                if not HackathonTeam_Unique_Code_Phase_2.objects.filter(team=team).exists():
+                    unique_code_obj = HackathonTeam_Unique_Code_Phase_2.objects.create(
+                        team=team,
+                        unique_code=str(uuid.uuid4()),
+                        is_active=True,
+                    )
+                else:
+                    unique_code_obj = HackathonTeam_Unique_Code_Phase_2.objects.get(team=team)
+
+                try:
+                    leader_name = team.leader.full_name if team.leader else (team.leader_signature or "Team Leader")
+                    form_link = f"{scheme}://{request.get_host()}/hackathon/phase-2/?token={unique_code_obj.unique_code}"
+
+                    message = MIMEMultipart()
+                    message["From"] = "IEEE NSU SB Portal <ieeensusb.portal@gmail.com>"
+                    message["To"] = str(team.leader_email).strip()
+                    message["Subject"] = f"SPARC 2026 - Hackathon Phase 02 Invitation & Finalization - {team.team_name}"
+
+                    context = {
+                        'leader_name': leader_name,
+                        'team': team,
+                        'phase2_registration_link': form_link,
+                        'banner_image_url': banner_image_url,
+                    }
+                    html_content = render_to_string('hackathon_phase2_acceptance.html', context)
+                    message.attach(MIMEText(html_content, 'html'))
+
+                    encoded_message = base64.urlsafe_b64encode(message.as_bytes()).decode()
+                    create_message = {"raw": encoded_message}
+
+                    send_message = (
+                        service.users()
+                        .messages()
+                        .send(userId="me", body=create_message)
+                        .execute()
+                    )
+                    print(f'Phase 2 acceptance email sent to leader {team.leader_email}, message Id: {send_message.get("id")}')
+                    sleep(2)
+
+                    team.is_phase_2_email_sent = True
+                    team.save(update_fields=['is_phase_2_email_sent'])
+                    sent_count += 1
+                except Exception as e:
+                    print(f'Failed sending Phase 2 email to {team.leader_email}: {e}')
+                    log_exception(e, request)
+
+        return JsonResponse({'message': f'Successfully emailed Phase 2 invitation to {sent_count} team leader(s)!', 'status': 'success'})
+    except Exception as e:
+        print(f"send_hackathon_phase02_email error: {e}")
+        log_exception(e, request)
+        return JsonResponse({'message': 'Error sending Phase 2 invitation emails.', 'status': 'error'})
+
+def send_hackathon_email_phase02(request, phase2_team):
+    """
+    Sends Phase 02 registration & payment confirmation email to ALL members of the hackathon team.
+    """
+    credentials = get_credentials()
+    if not credentials:
+        print("Google Mail API credentials not found or invalid.")
+        return JsonResponse({'message': 'Please re-authorise google api'})
+
+    try:
+        service = build(settings.GOOGLE_MAIL_API_NAME, settings.GOOGLE_MAIL_API_VERSION, credentials=credentials)
+        scheme = "https" if request.is_secure() else "http"
+        banner_image_url = f"{scheme}://{request.get_host()}/media_files/SPAC25LogoMin.png"
+
+        members = phase2_team.members.all()
+        for member in members:
+            if not member.email:
+                continue
+            try:
+                message = MIMEMultipart()
+                message["From"] = "IEEE NSU SB Portal <ieeensusb.portal@gmail.com>"
+                message["To"] = str(member.email).strip()
+                message["Subject"] = f"SPARC 2026 - Hackathon Phase 02 Registration & Payment Received - {phase2_team.team_name}"
+
+                context = {
+                    'recipient_name': member.full_name,
+                    'team': phase2_team,
+                    'member': member,
+                    'banner_image_url': banner_image_url,
+                }
+                html_content = render_to_string('hackathon_phase2_submission_email.html', context)
+                message.attach(MIMEText(html_content, 'html'))
+
+                encoded_message = base64.urlsafe_b64encode(message.as_bytes()).decode()
+                create_message = {"raw": encoded_message}
+
+                send_message = (
+                    service.users()
+                    .messages()
+                    .send(userId="me", body=create_message)
+                    .execute()
+                )
+                print(f'Hackathon Phase 2 confirmation sent to {member.email}, message Id: {send_message.get("id")}')
+                sleep(1)
+            except Exception as e:
+                print(f'Failed sending Hackathon Phase 2 confirmation to {member.email}: {e}')
+                log_exception(e, request)
+
+        return JsonResponse({'message': 'success'})
+    except Exception as e:
+        print(f"send_hackathon_email_phase02 error: {e}")
+        log_exception(e, request)
+        return JsonResponse({'message': 'error'})
 
 @login_required
 def authorize(request):

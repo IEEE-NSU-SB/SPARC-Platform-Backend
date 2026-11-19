@@ -15,6 +15,11 @@ from django.views.decorators.http import require_GET, require_POST
 from access_ctrl.decorators import permission_required
 from access_ctrl.utils import Site_Permissions
 from system_administration.utils import log_exception
+from emails.views import (
+    send_hackathon_email_phase01,
+    send_hackathon_phase02_email,
+    send_hackathon_email_phase02,
+)
 
 from .models import (
     HackathonFormStatus_Phase01,
@@ -235,8 +240,11 @@ def submit_phase01(request):
 
                 member.save()
 
-        # TODO (Step 8): Trigger hackathon Phase 1 confirmation email via emails.views
-        # send_hackathon_registration_email_phase01(request, team)
+        # Trigger hackathon Phase 1 confirmation email to all team members
+        try:
+            send_hackathon_email_phase01(request, team)
+        except Exception as email_exc:
+            log_exception(email_exc, request)
 
         return JsonResponse(
             {
@@ -371,6 +379,31 @@ def save_selected_phase01(request):
         log_exception(exc, request)
         return JsonResponse(
             {'message': 'Error saving team selections.', 'status': 'error'},
+            status=500,
+        )
+
+
+@login_required
+@permission_required('reg_form_control')
+@require_POST
+def send_phase02_email(request):
+    """Dispatches Phase 2 invitation emails with unique token links to Team Leaders of selected teams."""
+    try:
+        selected_teams = (
+            HackathonTeam_Phase01.objects
+            .filter(is_selected=True)
+            .prefetch_related('members')
+        )
+        if not selected_teams.exists():
+            return JsonResponse(
+                {'message': 'No selected teams found to email.', 'status': 'error'},
+                status=400,
+            )
+        return send_hackathon_phase02_email(request, selected_teams)
+    except Exception as exc:
+        log_exception(exc, request)
+        return JsonResponse(
+            {'message': 'Error sending Phase 2 invitation emails.', 'status': 'error'},
             status=500,
         )
 

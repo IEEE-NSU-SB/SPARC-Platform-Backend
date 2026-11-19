@@ -11,5 +11,6 @@ urlpatterns = [
     path('responses/phase-1/', views.response_table_phase01, name='response_table_phase01'),
     path('responses/phase-1/<int:id>/', views.view_response_phase01, name='view_response_phase01'),
     path('save-selected/phase-1/', views.save_selected_phase01, name='save_selected_phase01'),
+    path('send-phase02-email/', views.send_phase02_email, name='send_phase02_email'),
     path('download-excel/phase-1/', views.download_excel_phase01, name='download_excel_phase01'),
 ]

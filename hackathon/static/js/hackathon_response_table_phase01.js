@@ -15,10 +15,12 @@ document.addEventListener("DOMContentLoaded", function () {
   if (!root) return;
 
   const saveSelectedUrl = root.dataset.saveSelectedUrl;
+  const sendPhase02EmailUrl = root.dataset.sendPhase02EmailUrl;
   const csrfToken = root.dataset.csrfToken;
   const searchInput = document.getElementById("tableSearch");
   const selectAllBtn = document.getElementById("selectAllBtn");
   const saveBtn = document.getElementById("saveBtn");
+  const sendMailBtn = document.getElementById("sendMailBtn");
 
   // 2. Deep Cross-Member Live Search Filter
   if (searchInput) {
@@ -106,6 +108,47 @@ document.addEventListener("DOMContentLoaded", function () {
       } finally {
         saveBtn.disabled = false;
         saveBtn.textContent = originalText;
+      }
+    });
+  }
+
+  // 6. Send Phase-2 Email Action
+  if (sendMailBtn && sendPhase02EmailUrl) {
+    sendMailBtn.addEventListener("click", async function () {
+      if (
+        !confirm(
+          "Phase-2 invitation emails will be sent to the Team Leaders of all selected teams now. Are you sure?"
+        )
+      ) {
+        return;
+      }
+
+      sendMailBtn.disabled = true;
+      const originalText = sendMailBtn.textContent;
+      sendMailBtn.textContent = "Sending...";
+
+      try {
+        const response = await fetch(sendPhase02EmailUrl, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": csrfToken,
+          },
+        });
+
+        const data = await response.json();
+        if (response.ok && data.status === "success") {
+          alert(data.message || "Successfully emailed to selected team leaders!");
+          window.location.reload();
+        } else {
+          alert(data.message || "Failed to send Phase-2 emails.");
+        }
+      } catch (err) {
+        console.error("Error sending Phase-2 emails:", err);
+        alert("Network error while sending Phase-2 emails.");
+      } finally {
+        sendMailBtn.disabled = false;
+        sendMailBtn.textContent = originalText;
       }
     });
   }
