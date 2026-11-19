@@ -320,9 +320,16 @@ def response_table_phase01(request):
 
 
 @login_required
-@permission_required('view_reg_response')
 def view_response_phase01(request, id):
     """Detailed view for a single Hackathon Phase 1 team and all its members."""
+    if not (
+        request.user.is_superuser
+        or Site_Permissions.user_has_permission(request.user, 'view_reg_response')
+        or Site_Permissions.user_has_permission(request.user, 'view_reg_responses_list')
+        or Site_Permissions.user_has_permission(request.user, 'reg_form_control')
+    ):
+        return render(request, "AccessDenied.html")
+
     team = get_object_or_404(
         HackathonTeam_Phase01.objects.prefetch_related('members'),
         id=id,
@@ -341,12 +348,14 @@ def save_selected_phase01(request):
     """Bulk updates is_selected status for Hackathon Phase 1 teams."""
     try:
         data = json.loads(request.body)
-        selected_ids = data.get('selected_ids', [])
-        if not isinstance(selected_ids, list):
+        raw_ids = data.get('selected_ids', [])
+        if not isinstance(raw_ids, list):
             return JsonResponse(
                 {'message': 'selected_ids must be a list.', 'status': 'error'},
                 status=400,
             )
+
+        selected_ids = [int(x) for x in raw_ids if str(x).isdigit()]
 
         HackathonTeam_Phase01.objects.update(
             is_selected=Case(

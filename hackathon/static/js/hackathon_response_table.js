@@ -36,7 +36,7 @@ document.addEventListener("DOMContentLoaded", function () {
   // 3. Row Click Navigation (Ignoring Checkbox Clicks)
   document.querySelectorAll("tbody tr.data-row").forEach((row) => {
     row.addEventListener("click", function (e) {
-      if (e.target.closest("input[type='checkbox']")) {
+      if (e.target.closest("input") || e.target.closest("label") || e.target.closest("button")) {
         return;
       }
       const href = row.dataset.href;
