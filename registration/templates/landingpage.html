@@ -307,7 +307,6 @@
         <tr>
           <th></th>
           <th>Phase 1</th>
-          <th>Hackathon</th>
           <th>Phase 2</th>
           <th>QR Dashboard</th>
         </tr>
@@ -317,11 +316,6 @@
           <td class="row-title">Form</td>
           <td>
             <a href="{% url 'registration:registration_form_phase01' %}" class="table-btn">
-              Open
-            </a>
-          </td>
-          <td>
-            <a href="{% url 'hackathon:form_phase01' %}" class="table-btn">
               Open
             </a>
           </td>
@@ -342,11 +336,6 @@
           <td class="row-title">Response Table</td>
           <td>
             <a href="{% url 'registration:response_table_phase01' %}" class="table-btn">
-              View
-            </a>
-          </td>
-          <td>
-            <a href="{% url 'hackathon:response_table_phase01' %}" class="table-btn">
               View
             </a>
           </td>
@@ -376,24 +365,6 @@
     <div class="mobile-item">
       <span>Responses</span>
       <a href="{% url 'registration:response_table_phase01' %}" class="table-btn">
-        View
-      </a>
-    </div>
-  </div>
-
-  <div class="mobile-card">
-    <h3>Hackathon</h3>
-
-    <div class="mobile-item">
-      <span>Form</span>
-      <a href="{% url 'hackathon:form_phase01' %}" class="table-btn">
-        Open
-      </a>
-    </div>
-
-    <div class="mobile-item">
-      <span>Responses</span>
-      <a href="{% url 'hackathon:response_table_phase01' %}" class="table-btn">
         View
       </a>
     </div>
