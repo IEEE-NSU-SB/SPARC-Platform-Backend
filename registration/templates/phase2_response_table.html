@@ -4,7 +4,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>SPAC 2025 | Registration Dashboard</title>
+    <title>SPARC 2026 | Registration Dashboard</title>
     <link rel="icon" href="{% static '/img/logo.gif' %}" />
 
     <!-- Tailwind & DaisyUI -->
@@ -44,6 +44,18 @@
         background: #e49e35;
         transition: 0.3s;
       }
+      .back-btn {
+        background: #00629B;
+        color: white;
+        padding: 8px 16px;
+        border-radius: 6px;
+        border: 2px solid #ffffffa1;
+        transition: 0.3s;
+      }
+      .back-btn:hover {
+        background: #d3e4f7;
+        color: #00629B;
+      }
       input::placeholder {
         color: #ffffff;
       }
@@ -70,13 +82,21 @@
 
       <!-- New row for additional buttons -->
       <div class="flex items-center gap-4 justify-between mb-12">
-        <a href="{% url 'core:logout' %}" class="logout">Logout</a>
-        <!-- Statistics Button -->
+        <div class="flex items-center gap-3">
+          <a href="{% url 'registration:reg_landing' %}" class="back-btn">&larr; Back</a>
+          {% if has_perm.reg_form_control %}
+          <a href="{% url 'registration:download_excel_phase02' %}" class="back-btn">Download Excel</a>
+          {% endif %}
+        </div>
+        <div class="flex items-center gap-3">
+          <a href="{% url 'core:logout' %}" class="logout">Logout</a>
+          <!-- Statistics Button -->
           {% if has_perm.view_finance_info %}
             <button class="statistics" onclick="document.getElementById('statsModal').showModal()">
               Statistics
             </button>
           {% endif %}
+        </div>
       </div>
       
       <!-- Controls -->
@@ -87,16 +107,43 @@
             placeholder="Search by name or email"
             class="px-4 py-2 w-full max-md:mr-3 md:w-1/2 rounded-lg shadow-sm border-2 focus:border-[#ffffffab] focus:outline-none text-white"
           />
-          <button
-          id="saveBtn"
-            class="px-5 py-2 max-md:w-full max-md:mr-3 bg-[#1b395c] text-white rounded-lg shadow hover:bg-[#00629B] border-2 transition-all duration-300 ease-in-out"
-            >
-            Save Selections
-          </button>        
+          <div class="flex gap-2 max-md:w-full">
+            <button
+            id="saveBtn"
+              class="px-5 py-2 max-md:w-full bg-[#1b395c] text-white rounded-lg shadow hover:bg-[#00629B] border-2 transition-all duration-300 ease-in-out cursor-pointer"
+              >
+              Save Selections
+            </button>
+            <button
+            id="moveToQrBtn"
+              class="px-5 py-2 max-md:w-full bg-[#1b5c4a] text-white rounded-lg shadow hover:bg-[#009b55] border-2 transition-all duration-300 ease-in-out cursor-pointer"
+              title="Import confirmed participants to the unified QR Dashboard"
+              >
+              Move to QR Dashboard
+            </button>
+          </div>        
       </div>
 
+      <!-- Inline Standalone URL-Backed Folder Tabs (Attached Flush to Table Container) -->
+      <nav class="flex flex-wrap items-end gap-1.5" aria-label="Phase 2 Response Lists">
+        <a
+          href="{% url 'registration:response_table_phase02' %}"
+          class="px-5 py-3 rounded-t-xl bg-[#1b395c] text-white font-semibold text-sm border-2 border-b-0 border-white/40 relative z-10"
+          aria-current="page"
+        >
+          Participants ({{ tab_counts.participants_count|default:0 }})
+        </a>
+
+        <a
+          href="{% url 'hackathon:response_table_phase02' %}"
+          class="px-5 py-2.5 rounded-t-xl bg-blue-100 text-[#1b395c] hover:bg-white font-semibold text-sm border-2 border-b-0 border-white/40 transition-all"
+        >
+          Hackathon ({{ tab_counts.hackathon_teams_count|default:0 }} teams &bull; {{ tab_counts.hackathon_people_count|default:0 }} people)
+        </a>
+      </nav>
+
       <!-- Table -->
-      <div class="bg-white rounded-xl shadow-lg overflow-x-auto max-h-[450px]">
+      <div class="bg-white rounded-b-xl rounded-tr-xl shadow-lg overflow-x-auto max-h-[450px]">
         <table class="min-w-full text-sm">
           <thead class="sticky top-0 z-10">
             <tr class="bg-[#1b395c] text-white">
@@ -141,7 +188,7 @@
 
       <!-- Footer -->
       <div class="text-center mt-6 text-gray-200 text-sm italic">
-        2025 © IEEE NSU Student Branch
+        2026 © IEEE NSU Student Branch
       </div>
     </div>
 
@@ -276,6 +323,41 @@
           alert("Failed to save selections.");
         });
       });
+
+      // Move to QR Dashboard listener
+      const moveToQrBtn = document.getElementById("moveToQrBtn");
+      if (moveToQrBtn) {
+        moveToQrBtn.addEventListener("click", () => {
+          moveToQrBtn.disabled = true;
+          const orig = moveToQrBtn.textContent;
+          moveToQrBtn.textContent = "Moving...";
+          fetch("/init/import_reg_participants/", {
+            method: "GET",
+            headers: { "X-Requested-With": "XMLHttpRequest" }
+          })
+          .then(r => r.json())
+          .then(data => {
+            if (data.message === "success") {
+              const openDash = confirm(`Participants imported to QR Dashboard successfully! (${data.imported_count || 0} newly added).\n\nDo you want to open the QR Dashboard now?`);
+              if (openDash) {
+                window.location.href = "{% url 'core:dashboard' %}";
+              } else {
+                window.location.reload();
+              }
+            } else {
+              alert(data.message || "Failed to import participants.");
+            }
+          })
+          .catch(err => {
+            console.error("Import error:", err);
+            alert("Network error while importing to QR Dashboard.");
+          })
+          .finally(() => {
+            moveToQrBtn.disabled = false;
+            moveToQrBtn.textContent = orig;
+          });
+        });
+      }
 
       // Row click
       document.querySelectorAll("tbody tr").forEach((row) => {

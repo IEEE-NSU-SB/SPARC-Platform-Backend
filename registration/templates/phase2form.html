@@ -4,7 +4,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>SPAC 2025 | Phase 02 Registration Form</title>
+    <title>SPARC 2026 | Phase 02 Registration Form</title>
     <link rel="icon" href="{% static '/img/logo.gif' %}" />
     <!--daisy ui-->
     <link
@@ -231,6 +231,27 @@
         {% endif %}
       </div>
     </div>
+
+    {% if is_staff_view or has_perm.reg_form_control or has_perm.view_reg_responses_list or user.is_staff or user.is_superuser %}
+    <!-- Small Thin Phase 2 Navigation Tab (Participants vs Hackathon) -->
+    <div class="w-11/12 md:w-3/5 mx-auto -mt-2 mb-3">
+      <div class="inline-flex p-1 rounded-lg bg-[#002855]/70 backdrop-blur-md border border-white/30 shadow-[0_2px_8px_rgba(0,0,0,0.25)] text-sm">
+        <a
+          href="{% if is_staff_view %}{% url 'registration:registration_admin_phase02' %}{% else %}{% url 'registration:registration_form_phase02' %}{% endif %}"
+          class="px-5 py-1.5 rounded-md font-semibold transition-all duration-200 bg-[#00629B] text-white shadow-sm"
+        >
+          Participants
+        </a>
+        <a
+          href="{% if is_staff_view %}{% url 'hackathon:admin_phase02' %}{% else %}{% url 'hackathon:form_phase02' %}{% endif %}"
+          class="px-5 py-1.5 rounded-md font-semibold transition-all duration-200 text-white/80 hover:text-white hover:bg-white/10"
+        >
+          Hackathon
+        </a>
+      </div>
+    </div>
+    {% endif %}
+
     {% if has_perm.reg_form_control %}
     <!-- admin feature part  -->
     <div class="rounded">
@@ -365,7 +386,7 @@
           <!-- Step 1: Basic Info -->
           <section id="step1" class="shadow-md p-5 font-medium rounded-md">
             <h2 class="md:text-3xl text-xl text-center mb-5">
-              Phase 02 - Participants Registration -  Student Professional Awareness Conference (SPAC) 2025
+              Phase 02 - Participants Registration -  Student Professional Awareness Conference (SPARC) 2026
             </h2>
             <b>
               Thank you for completing the registration for Phase 1!
@@ -419,13 +440,13 @@
             </li>
             <br>
             <br>
-            <b>Registration Deadline: 24th December, 2025 @ 11:59 PM</b>
+            <b>Registration Deadline: 24th December, 2026 @ 11:59 PM</b>
             <br>
             <br>
             <span style="font-style: italic;">**Fill in the payment details with the appropriate Transaction ID. Failure to comply or an incorrect Transaction ID will lead to the payment being disapproved.</span>
             <br>
             <br>
-            Please ensure your payment details match your registered information for seamless processing. Get ready to embark on an unforgettable journey at SPAC 2025!
+            Please ensure your payment details match your registered information for seamless processing. Get ready to embark on an unforgettable journey at SPARC 2026!
 
             <hr class="my-6 w-[100%] m-auto text-gray-400">
             <h2 class="section_heading">BASIC INFO</h2>
@@ -787,7 +808,7 @@
 
     <div class="flex justify-center items-center mt-3 h-15 mx-5 text-center sticky top-140 ">
       <p class="text-white font-semibold italic">
-        <small>2025 © All rights reserved by IEEE NSU Student Branch</small>
+        <small>2026 © All rights reserved by IEEE NSU Student Branch</small>
       </p>
     </div>
 

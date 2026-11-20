@@ -14,7 +14,7 @@ from emails.views import send_participant_phase02_email, send_registration_email
 from django.db.models import Count, Q
 from django.db.models.functions import Trim
 
-from hackathon.utils import get_phase01_tab_counts
+from hackathon.utils import get_phase01_tab_counts, get_phase02_tab_counts
 
 from .models import *
 
@@ -584,7 +584,8 @@ def response_table2(request):
         'total_amount': total_amount,
         'reg_stats': reg_stats,
         'tshirt_size_data': tshirt_size_data,
-        'has_perm': permissions
+        'has_perm': permissions,
+        'tab_counts': get_phase02_tab_counts(),
     }
     return render(request, 'phase2_response_table.html', context)
 

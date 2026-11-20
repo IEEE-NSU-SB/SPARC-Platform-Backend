@@ -1,0 +1,105 @@
+<div>
+  <!-- Centering table -->
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#f4f4f6;padding:20px 0;">
+    <tr>
+      <td align="center">
+        <!-- Container -->
+        <table role="presentation" width="600" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:8px;overflow:hidden;box-shadow:0 2px 6px rgba(0,0,0,0.08);">
+          <!-- Header -->
+          <tr>
+            <td style="background:linear-gradient(135deg, #00629B 0%, #004c7a 50%, #003d61 100%);padding:30px 24px 20px 24px;color:#ffffff;text-align:center;">
+              {% if banner_image_url %}
+              <img src="{{ banner_image_url }}" alt="SPARC 2026 Logo" style="max-width:250px;height:auto;margin-bottom:16px;display:block;margin-left:auto;margin-right:auto;" />
+              {% endif %}
+              <h1 style="margin:0;font-size:20px;line-height:1.2;">Congratulations! Team Selected for Phase 02</h1>
+              <p style="margin:6px 0 0 0;font-size:14px;color:#e0f2fe;">SPARC 2026 &bull; IS AI COOKED? Hackathon</p>
+            </td>
+          </tr>
+
+          <!-- Body -->
+          <tr>
+            <td style="padding:24px;color:#1f2937;">
+              <p style="margin:0 0 14px 0;font-size:15px;">Dear {{ leader_name }},</p>
+
+              <p style="margin:0 0 14px 0;font-size:15px;line-height:1.5;">
+                <strong>Congratulations!</strong> We are thrilled to inform you that your team, <strong>{{ team.team_name }}</strong>, has been officially selected for <strong>Phase 02 of the IS AI COOKED? Hackathon</strong> at <strong>SPARC 2026</strong>, organized by the <strong>IEEE NSU Student Branch</strong>.
+              </p>
+
+              <p style="margin:0 0 14px 0;font-size:15px;line-height:1.5;">
+                As the Team Leader, you are responsible for completing the Phase 02 finalization on behalf of your team. In this phase, you will verify your team roster, select <strong>T-shirt sizes for each member</strong>, and complete the team registration fee payment.
+              </p>
+
+              <!-- Payment Box -->
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #fde68a;border-radius:6px;background:#fef3c7;margin:18px 0;">
+                <tr>
+                  <td style="padding:16px;">
+                    <h3 style="margin:0 0 8px 0;font-size:16px;color:#92400e;">Payment Instructions (Team Fee)</h3>
+                    <p style="margin:4px 0;font-size:14px;"><strong>Payment Method:</strong> bKash / Nagad</p>
+                    <p style="margin:4px 0;font-size:14px;"><strong>Wallet Number:</strong> <span style="font-size:16px;font-weight:bold;color:#b91c1c;">01309570567</span> (Send Money / Merchant)</p>
+                    <p style="margin:8px 0 0 0;font-size:13px;color:#78350f;line-height:1.5;">
+                      <strong>Important:</strong> After completing the payment, note down the <strong>Transaction ID</strong> and the sender phone number. You must input both in the Phase 02 form.
+                    </p>
+                  </td>
+                </tr>
+              </table>
+
+              <!-- Requirements checklist -->
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #d1fae5;border-radius:6px;background:#ecfdf5;margin-bottom:18px;">
+                <tr>
+                  <td style="padding:16px;">
+                    <h3 style="margin:0 0 8px 0;font-size:15px;color:#065f46;">Phase 02 Completion Checklist:</h3>
+                    <ul style="margin:0;padding-left:20px;font-size:14px;line-height:1.6;color:#047857;">
+                      <li>Verify your team members' academic information</li>
+                      <li>Select appropriate T-shirt size (S, M, L, XL, 2XL, 3XL) for each member</li>
+                      <li>Provide your payment Transaction ID and sender number</li>
+                    </ul>
+                  </td>
+                </tr>
+              </table>
+
+              <!-- CTA button -->
+              <table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="margin:24px 0;">
+                <tr>
+                  <td align="center">
+                    <a href="{{ phase2_registration_link }}" 
+                      style="display:inline-block;padding:14px 28px;text-decoration:none;background:#059669;color:#ffffff;border-radius:6px;font-size:16px;font-weight:bold;box-shadow:0 2px 8px rgba(5,150,105,0.3);" 
+                      target="_blank" rel="noopener noreferrer">Complete Phase 02 Team Registration &rarr;</a>
+                    
+                    <p style="margin:10px 0 0 0;font-size:12px;color:#6b7280;font-style:italic;">
+                      This personalized registration link is unique to your team. Please do not share it outside your team.
+                    </p>
+                  </td>
+                </tr>
+              </table>
+
+              <hr style="border:none;border-top:1px solid #e6e9ef;margin:20px 0;">
+
+              <p style="margin:0 0 6px 0;font-size:14px;color:#374151;">
+                Once Phase 02 is submitted and payment is verified, each of your team members will receive their personal QR code badges for event access and goodies!
+              </p>
+
+              <p style="margin:12px 0 0 0;font-size:14px;color:#374151;">
+                Best regards,<br>
+                <strong>SPARC 2026 Organizing Committee</strong><br>
+                IEEE NSU Student Branch
+              </p>
+
+              <p style="margin:12px 0 0 0;font-size:13px;color:#6b7280;">
+                For any assistance, contact <a href="mailto:ieeensusb.portal@gmail.com" style="color:#0b5ed7;text-decoration:none;">ieeensusb.portal@gmail.com</a>
+              </p>
+            </td>
+          </tr>
+
+          <!-- Footer -->
+          <tr>
+            <td style="background:#f8fafc;padding:16px 24px;color:#6b7280;font-size:13px;">
+              <p style="margin:0;">IEEE NSU SB &bull; North South University</p>
+              <p style="margin:6px 0 0 0;">This invitation was sent directly to the Team Leader of "{{ team.team_name }}".</p>
+            </td>
+          </tr>
+        </table>
+        <!-- End container -->
+      </td>
+    </tr>
+  </table>
+</div>
