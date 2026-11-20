@@ -13,34 +13,34 @@
   "
 >
   <div class="shadow-md p-5 sm:p-8 font-medium rounded-md">
-    <header class="form-head mb-6">
-      <h2 class="md:text-3xl text-xl text-center mb-5 font-bold text-[#122812]">
-        SPARC Ambassador Application 2026
-      </h2>
-      <p class="text-justify text-[#122812] mb-4 leading-relaxed">
-        Thank you for your interest in becoming a SPARC Ambassador. Ambassadors
-        represent SPARC at their university, promote events, and earn points
-        through tasks. Top-ranked ambassadors get special recognition. Photo and
-        name are shown on the website and social media. Selected applicants are
-        told by email and get a unique Ambassador Code.
-      </p>
 
-      <div class="photo-guide-intro mb-4 text-[#122812]">
-        <p class="guide-title font-bold mb-1">Photo guide:</p>
-        <ul class="guide-list list-disc ml-5 text-sm space-y-1">
-          <li>formal attire, plain light background, face clearly visible and looking at the camera, no sunglasses or filters, clear and high resolution.</li>
-        </ul>
-      </div>
-    </header>
-
-    {# Section numbers follow the source spec, which skips Section 5. #}
     <form id="ambassador-form" method="post" enctype="multipart/form-data"
           action="{% url 'ambassador_registration:ambassador_apply' %}" novalidate>
       {% csrf_token %}
       {{ form.non_field_errors }}
 
-      <!-- ============ Personal & University information ============ -->
-      <section class="card-section mb-6">
+      <!-- ============ Step 1: Personal & University information ============ -->
+      <section id="step1" class="card-section mb-4">
+        <header class="form-head mb-6">
+          <h2 class="md:text-3xl text-xl text-center mb-5 font-bold text-[#122812]">
+            SPARC Ambassador Application 2026
+          </h2>
+          <p class="text-justify text-[#122812] mb-4 leading-relaxed">
+            Thank you for your interest in becoming a SPARC Ambassador. Ambassadors
+            represent SPARC at their university, promote events, and earn points
+            through tasks. Top-ranked ambassadors get special recognition. Photo and
+            name are shown on the website and social media. Selected applicants are
+            told by email and get a unique Ambassador Code.
+          </p>
+
+          <div class="photo-guide-intro mb-4 text-[#122812]">
+            <p class="guide-title font-bold mb-1">Photo guide:</p>
+            <ul class="guide-list list-disc ml-5 text-sm space-y-1">
+              <li>formal attire, plain light background, face clearly visible and looking at the camera, no sunglasses or filters, clear and high resolution.</li>
+            </ul>
+          </div>
+        </header>
+
         <hr class="my-6 w-[100%] m-auto text-gray-400">
         <h2 class="section_heading">PERSONAL &amp; UNIVERSITY INFORMATION</h2>
 
@@ -97,12 +97,18 @@
           {{ form.student_id }}
           {{ form.student_id.errors }}
         </div>
+
+        <div class="flex justify-center mt-6">
+          <button onclick="nextStep(1)" class="continue-btn" type="button">Continue</button>
+        </div>
       </section>
 
-      <!-- ============ Section 3: IEEE information ============ -->
-      <section class="card-section mb-6">
-        <hr class="my-6 w-[100%] m-auto text-gray-400">
-        <h2 class="section_heading"><span class="sec-no">Section 3:</span> IEEE Information</h2>
+      <!-- ============ Step 2: IEEE information ============ -->
+      <section id="step2" class="card-section mb-4 hidden">
+        <div class="flex items-center justify-between mb-2">
+          <button onclick="prevStep(2)" class="back-btn" type="button">Back</button>
+        </div>
+        <h2 class="section_heading">IEEE INFORMATION</h2>
 
         <fieldset class="mb-5 field choice-group" data-field="is_ieee_member">
           <legend class="input_label">Are you an IEEE member? <span class="text-red-700 ml-1">*</span></legend>
@@ -137,12 +143,18 @@
             {{ form.ieee_position.errors }}
           </div>
         </div>
+
+        <div class="flex justify-center mt-6">
+          <button onclick="nextStep(2)" class="continue-btn" type="button">Continue</button>
+        </div>
       </section>
 
-      <!-- ============ Section 4: Photo for website, social media and ID ============ -->
-      <section class="card-section mb-6">
-        <hr class="my-6 w-[100%] m-auto text-gray-400">
-        <h2 class="section_heading"><span class="sec-no">Section 4:</span> Photo for website, social media and ID</h2>
+      <!-- ============ Step 3: Photo for website, social media and ID ============ -->
+      <section id="step3" class="card-section mb-4 hidden">
+        <div class="flex items-center justify-between mb-2">
+          <button onclick="prevStep(3)" class="back-btn" type="button">Back</button>
+        </div>
+        <h2 class="section_heading">PHOTO FOR WEBSITE, SOCIAL MEDIA AND ID</h2>
 
         <div class="mb-5 field" data-field="photo">
           <label for="{{ form.photo.id_for_label }}" class="input_label">Upload your formal photo <span class="text-red-700 ml-1">*</span></label>
@@ -160,12 +172,18 @@
           </div>
           {{ form.bio.errors }}
         </div>
+
+        <div class="flex justify-center mt-6">
+          <button onclick="nextStep(3)" class="continue-btn" type="button">Continue</button>
+        </div>
       </section>
 
-      <!-- ============ Section 6: About you ============ -->
-      <section class="card-section mb-6">
-        <hr class="my-6 w-[100%] m-auto text-gray-400">
-        <h2 class="section_heading"><span class="sec-no">Section 6:</span> About you</h2>
+      <!-- ============ Step 4: About you ============ -->
+      <section id="step4" class="card-section mb-4 hidden">
+        <div class="flex items-center justify-between mb-2">
+          <button onclick="prevStep(4)" class="back-btn" type="button">Back</button>
+        </div>
+        <h2 class="section_heading">ABOUT YOU</h2>
 
         <div class="mb-5 field" data-field="why_ambassador">
           <label for="{{ form.why_ambassador.id_for_label }}" class="input_label">Why do you want to become a SPARC Ambassador? <span class="text-red-700 ml-1">*</span></label>
@@ -192,12 +210,18 @@
           </div>
           {{ form.heard_from.errors }}
         </fieldset>
+
+        <div class="flex justify-center mt-6">
+          <button onclick="nextStep(4)" class="continue-btn" type="button">Continue</button>
+        </div>
       </section>
 
-      <!-- ============ Section 7: Agreement ============ -->
-      <section class="card-section mb-6">
-        <hr class="my-6 w-[100%] m-auto text-gray-400">
-        <h2 class="section_heading"><span class="sec-no">Section 7:</span> Agreement <span class="text-sm font-normal text-gray-600">(all four required)</span></h2>
+      <!-- ============ Step 5: Agreement ============ -->
+      <section id="step5" class="card-section mb-4 hidden">
+        <div class="flex items-center justify-between mb-2">
+          <button onclick="prevStep(5)" class="back-btn" type="button">Back</button>
+        </div>
+        <h2 class="section_heading">AGREEMENT <span class="text-sm font-normal text-gray-600">(all four required)</span></h2>
 
         <div class="mb-3 field agree-field" data-field="agree_info_accurate">
           <label class="choice agree">{{ form.agree_info_accurate }} <span>{{ form.agree_info_accurate.label }} <span class="text-red-700 ml-1">*</span></span></label>
@@ -218,12 +242,12 @@
           <label class="choice agree">{{ form.agree_contact_consent }} <span>{{ form.agree_contact_consent.label }} <span class="text-red-700 ml-1">*</span></span></label>
           {{ form.agree_contact_consent.errors }}
         </div>
-      </section>
 
-      <div class="flex flex-col items-center justify-center mt-8 mb-4 submit-row">
-        <button type="submit" id="submit-btn" class="continue-btn">Submit application</button>
-        <p class="hint text-center mt-2">Selected applicants are notified by email with their unique Ambassador Code.</p>
-      </div>
+        <div class="flex flex-col items-center justify-center mt-8 mb-4 submit-row">
+          <button type="submit" id="submit-btn" class="continue-btn">Submit application</button>
+          <p class="hint text-center mt-2">Selected applicants are notified by email with their unique Ambassador Code.</p>
+        </div>
+      </section>
     </form>
 
     {# Shown by form.js on successful submit; also rendered by thanks.html. #}
