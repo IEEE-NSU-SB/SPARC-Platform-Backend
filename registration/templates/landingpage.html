@@ -308,6 +308,7 @@
           <th></th>
           <th>Phase 1</th>
           <th>Phase 2</th>
+          <th>Ambassador</th>
           <th>QR Dashboard</th>
         </tr>
       </thead>
@@ -324,6 +325,11 @@
               Open
             </a>
             {% comment %} <span class="disabled-btn">Coming Soon</span> {% endcomment %}
+          </td>
+          <td>
+            <a href="{% url 'ambassador_registration:ambassador_apply' %}" class="table-btn">
+              Open
+            </a>
           </td>
           <td>
             <a href="{% url 'core:dashboard' %}" class="table-btn">
@@ -344,6 +350,9 @@
               View
             </a>
             {% comment %} <span class="disabled-btn">Coming Soon</span> {% endcomment %}
+          </td>
+          <td>
+            <span class="disabled-btn">Coming Soon</span>
           </td>
           <td></td>
         </tr>
@@ -385,6 +394,22 @@
       <a href="{% url 'registration:response_table_phase02' %}" class="table-btn">
         View
       </a>
+    </div>
+  </div>
+
+  <div class="mobile-card">
+    <h3>Ambassador</h3>
+
+    <div class="mobile-item">
+      <span>Form</span>
+      <a href="{% url 'ambassador_registration:ambassador_apply' %}" class="table-btn">
+        Open
+      </a>
+    </div>
+
+    <div class="mobile-item">
+      <span>Responses</span>
+      <span class="disabled-btn">Coming Soon</span>
     </div>
   </div>
 
