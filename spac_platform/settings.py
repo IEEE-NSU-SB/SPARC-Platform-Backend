@@ -47,7 +47,9 @@ INSTALLED_APPS = [
     'system_administration',
     'access_ctrl',
     'access_ctrl.apps.CustomAuthConfig',
-    'hackathon'
+    'hackathon',
+    'ambassador_registration.apps.AmbassadorRegistrationConfig',
+    'ambassador_email.apps.AmbassadorEmailConfig',
 ]
 
 MIDDLEWARE = [
@@ -162,13 +164,16 @@ PROTECTED_URL = "/protected/"
 LOGIN_URL = '/login'
 
 
+SITE_URL = os.environ.get('SITE_URL', 'http://localhost:8000')
+
 GOOGLE_CLOUD_CLIENT_ID=os.environ.get('DEV_GOOGLE_CLOUD_CLIENT_ID')
 GOOGLE_CLOUD_PROJECT_ID=os.environ.get('DEV_GOOGLE_CLOUD_PROJECT_ID')
-GOOGLE_CLOUD_AUTH_URI=os.environ.get('DEV_GOOGLE_CLOUD_AUTH_URI')
-GOOGLE_CLOUD_TOKEN_URI=os.environ.get('DEV_GOOGLE_CLOUD_TOKEN_URI')
+GOOGLE_CLOUD_AUTH_URI=os.environ.get('DEV_GOOGLE_CLOUD_AUTH_URI', 'https://accounts.google.com/o/oauth2/auth')
+GOOGLE_CLOUD_TOKEN_URI=os.environ.get('DEV_GOOGLE_CLOUD_TOKEN_URI', 'https://oauth2.googleapis.com/token')
 GOOGLE_CLOUD_AUTH_PROVIDER_x509_cert_url=os.environ.get('DEV_GOOGLE_CLOUD_AUTH_PROVIDER_x509_cert_url')
 GOOGLE_CLOUD_CLIENT_SECRET=os.environ.get('DEV_GOOGLE_CLOUD_CLIENT_SECRET')
-SCOPES=os.environ.get('DEV_SCOPES')
+_dev_scopes = os.environ.get('DEV_SCOPES', 'https://www.googleapis.com/auth/gmail.send')
+SCOPES = _dev_scopes.split() if isinstance(_dev_scopes, str) else _dev_scopes
 
 GOOGLE_MAIL_API_NAME=os.environ.get('GOOGLE_MAIL_API_NAME')
 GOOGLE_MAIL_API_VERSION=os.environ.get('GOOGLE_MAIL_API_VERSION')
@@ -176,3 +181,29 @@ GOOGLE_MAIL_API_VERSION=os.environ.get('GOOGLE_MAIL_API_VERSION')
 GOOGLE_CLOUD_TOKEN=os.environ.get('GOOGLE_CLOUD_TOKEN')
 GOOGLE_CLOUD_REFRESH_TOKEN=os.environ.get('GOOGLE_CLOUD_REFRESH_TOKEN')
 GOOGLE_CLOUD_EXPIRY=os.environ.get('GOOGLE_CLOUD_EXPIRY')
+
+MAIL_SENDER = os.environ.get('MAIL_SENDER', 'IEEE NSU SB Portal <ieeensusb.portal@gmail.com>')
+RATE_LIMIT_APPLY_PER_HOUR = int(os.environ.get('RATE_LIMIT_APPLY_PER_HOUR', '30'))
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'console': {
+            'format': '%(asctime)s %(levelname)s %(name)s %(message)s',
+        },
+    },
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+            'formatter': 'console',
+        },
+    },
+    'loggers': {
+        'ambassador_email': {
+            'handlers': ['console'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+    },
+}

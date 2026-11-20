@@ -5,7 +5,10 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 import json
 import os
+import threading
+from functools import wraps
 from time import sleep
+from urllib.parse import urlsplit
 import uuid
 from django.http import HttpResponse, HttpResponseBadRequest, JsonResponse
 from django.shortcuts import redirect, render
@@ -477,49 +480,57 @@ def send_hackathon_email_phase02(request, phase2_team):
         log_exception(e, request)
         return JsonResponse({'message': 'error'})
 
-@login_required
-def authorize(request):
+_token_lock = threading.RLock()
+_cached_credentials = None
 
-    credentials = get_credentials()
-    if not credentials:
-        flow = get_google_auth_flow(request)
-        if(request.META['HTTP_HOST'] == "127.0.0.1:8000" or request.META['HTTP_HOST'] == "localhost:8000"):
-            authorization_url, state = flow.authorization_url(
-                access_type='offline',
-                include_granted_scopes='true',
-            )
+
+def _redirect_uri(request=None):
+    """
+    Byte-exact match with URI registered in Google Cloud Console.
+    NOTE: No trailing slash - Google compares the redirect URI literally.
+    """
+    site_url = getattr(settings, 'SITE_URL', None) or os.environ.get('SITE_URL')
+    if site_url:
+        return f"{site_url.rstrip('/')}/init/oauth2callback"
+    if request:
+        host = request.get_host().lower()
+        if host.startswith('127.0.0.1'):
+            host = host.replace('127.0.0.1', 'localhost', 1)
+        scheme = 'https' if request.is_secure() else 'http'
+        return f"{scheme}://{host}/init/oauth2callback"
+    return "http://localhost:8000/init/oauth2callback"
+
+
+def _canonical_host(view):
+    """
+    Ensure the OAuth flow starts on the canonical host (e.g. localhost instead of 127.0.0.1).
+    Session cookies are bound to the specific host; starting on 127.0.0.1 and returning to
+    localhost breaks the session and causes 'State mismatch' or 'Invalid state parameter'.
+    """
+    @wraps(view)
+    def wrapper(request, *args, **kwargs):
+        site_url = getattr(settings, 'SITE_URL', None) or os.environ.get('SITE_URL')
+        if site_url:
+            target_netloc = urlsplit(site_url).netloc.lower()
+            current_netloc = request.get_host().lower()
+            if target_netloc and current_netloc != target_netloc:
+                target = site_url.rstrip('/') + request.get_full_path()
+                return redirect(target)
         else:
-            authorization_url, state = flow.authorization_url(
-                access_type='offline',
-                include_granted_scopes='true',
-                login_hint='ieeensusb.portal@gmail.com'
-            )
-        request.session['state'] = state
-        return redirect(authorization_url)
+            host = request.get_host().lower()
+            if host.startswith('127.0.0.1'):
+                canonical_host = host.replace('127.0.0.1', 'localhost', 1)
+                scheme = 'https' if request.is_secure() else 'http'
+                target = f"{scheme}://{canonical_host}{request.get_full_path()}"
+                return redirect(target)
+        return view(request, *args, **kwargs)
+    return wrapper
 
-    # if credentials != None:
-        # messages.success(request, "Already authorized!")    
-    return redirect('core:dashboard')
 
-def oauth2callback(request):
-    try:
-        if(request.META['HTTP_HOST'] == "127.0.0.1:8000" or request.META['HTTP_HOST'] == "localhost:8000"):
-            os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
-        state = request.GET.get('state')
-        if state != request.session.pop('state', None):
-            return HttpResponseBadRequest('Invalid state parameter')
-        
-        flow = get_google_auth_flow(request)
-        flow.fetch_token(authorization_response=request.build_absolute_uri())
-        credentials = flow.credentials
-        save_credentials(credentials)
-        # messages.success(request, "Authorized")
-        return redirect('core:dashboard')
-    except:
-        # messages.warning(request, "Access Denied!")
-        return redirect('core:dashboard')
-    
 def get_google_auth_flow(request):
+    if settings.DEBUG:
+        os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
+
     client_config = {
         'web': {
             'client_id': settings.GOOGLE_CLOUD_CLIENT_ID,
@@ -528,54 +539,131 @@ def get_google_auth_flow(request):
             'token_uri': settings.GOOGLE_CLOUD_TOKEN_URI,
             'auth_provider_x509_cert_url': settings.GOOGLE_CLOUD_AUTH_PROVIDER_x509_cert_url,
             'client_secret': settings.GOOGLE_CLOUD_CLIENT_SECRET,
+            'redirect_uris': [_redirect_uri(request)],
         }
     }
-    if(request.META['HTTP_HOST'] == "127.0.0.1:8000" or request.META['HTTP_HOST'] == "localhost:8000"):
-        redirect_uri=f"http://{request.META['HTTP_HOST']}/init/oauth2callback"
-    else:
-        redirect_uri=f"https://{request.META['HTTP_HOST']}/init/oauth2callback"
-
     return Flow.from_client_config(
         client_config,
-        settings.SCOPES,
-        redirect_uri=redirect_uri
+        scopes=settings.SCOPES,
+        redirect_uri=_redirect_uri(request),
+        autogenerate_code_verifier=True,
     )
 
+
+@_canonical_host
+@login_required
+def authorize(request):
+    if settings.DEBUG:
+        os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
+
+    flow = get_google_auth_flow(request)
+    auth_kwargs = {
+        'access_type': 'offline',
+        'prompt': 'consent',
+        'include_granted_scopes': 'true',
+    }
+    host = request.get_host().lower()
+    if not (host.startswith('127.0.0.1') or host.startswith('localhost')):
+        auth_kwargs['login_hint'] = 'ieeensusb.portal@gmail.com'
+
+    authorization_url, state = flow.authorization_url(**auth_kwargs)
+    request.session['state'] = state
+    verifier = getattr(flow, 'code_verifier', None)
+    if verifier:
+        request.session['oauth_verifier'] = verifier
+    return redirect(authorization_url)
+
+
+def oauth2callback(request):
+    if settings.DEBUG:
+        os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
+    try:
+        incoming_state = request.GET.get('state')
+        expected_state = request.session.pop('state', None)
+        if not incoming_state or not expected_state or incoming_state != expected_state:
+            site_url = getattr(settings, 'SITE_URL', 'http://localhost:8000')
+            return HttpResponseBadRequest(
+                f"Invalid state parameter (expected: {expected_state!r}, received: {incoming_state!r}). "
+                f"Please start authorization from {site_url}/init/authorise/ in the same browser window."
+            )
+
+        if request.GET.get('error'):
+            error_reason = request.GET.get('error')
+            return HttpResponseBadRequest(f"Google authorization failed: {error_reason}")
+
+        flow = get_google_auth_flow(request)
+        verifier = request.session.pop('oauth_verifier', None)
+        if verifier:
+            flow.code_verifier = verifier
+
+        code = request.GET.get('code')
+        if not code:
+            return HttpResponseBadRequest("Authorization code missing from callback.")
+
+        flow.fetch_token(code=code)
+        credentials = flow.credentials
+        save_credentials(credentials)
+        messages.success(request, "Google OAuth successfully authorized! Tokens saved.")
+        return redirect('core:dashboard')
+    except Exception as e:
+        log_exception(e, request)
+        return HttpResponseBadRequest(f"OAuth token exchange failed: {e}")
+
+
 def save_credentials(credentials):
-        set_key('.env', 'GOOGLE_CLOUD_TOKEN', credentials.token)
-        settings.GOOGLE_CLOUD_TOKEN = credentials.token
-        if(credentials.refresh_token):
+    global _cached_credentials
+    with _token_lock:
+        token = credentials.token or ''
+        set_key('.env', 'GOOGLE_CLOUD_TOKEN', token)
+        settings.GOOGLE_CLOUD_TOKEN = token
+        os.environ['GOOGLE_CLOUD_TOKEN'] = token
+
+        if credentials.refresh_token:
             set_key('.env', 'GOOGLE_CLOUD_REFRESH_TOKEN', credentials.refresh_token)
             settings.GOOGLE_CLOUD_REFRESH_TOKEN = credentials.refresh_token
-        if(credentials.expiry):
-            set_key('.env', 'GOOGLE_CLOUD_EXPIRY', credentials.expiry.isoformat())
-            settings.GOOGLE_CLOUD_EXPIRY = credentials.expiry.isoformat()
+            os.environ['GOOGLE_CLOUD_REFRESH_TOKEN'] = credentials.refresh_token
+
+        if credentials.expiry:
+            expiry_str = credentials.expiry.isoformat()
+            set_key('.env', 'GOOGLE_CLOUD_EXPIRY', expiry_str)
+            settings.GOOGLE_CLOUD_EXPIRY = expiry_str
+            os.environ['GOOGLE_CLOUD_EXPIRY'] = expiry_str
+
+        _cached_credentials = credentials
 
 
 def get_credentials():
-    
-        creds = None
+    global _cached_credentials
+    if _cached_credentials is not None and _cached_credentials.valid:
+        return _cached_credentials
 
-        if settings.GOOGLE_CLOUD_TOKEN:
-            creds = Credentials.from_authorized_user_info({
-                'token':settings.GOOGLE_CLOUD_TOKEN,
-                'refresh_token':settings.GOOGLE_CLOUD_REFRESH_TOKEN,
-                'token_uri':settings.GOOGLE_CLOUD_TOKEN_URI,
-                'client_id':settings.GOOGLE_CLOUD_CLIENT_ID,
-                'client_secret':settings.GOOGLE_CLOUD_CLIENT_SECRET,
-                'expiry':settings.GOOGLE_CLOUD_EXPIRY
-            },scopes=settings.SCOPES)
+    with _token_lock:
+        token = os.environ.get('GOOGLE_CLOUD_TOKEN') or getattr(settings, 'GOOGLE_CLOUD_TOKEN', None)
+        refresh_token = os.environ.get('GOOGLE_CLOUD_REFRESH_TOKEN') or getattr(settings, 'GOOGLE_CLOUD_REFRESH_TOKEN', None)
+        token_uri = getattr(settings, 'GOOGLE_CLOUD_TOKEN_URI', 'https://oauth2.googleapis.com/token')
+        client_id = getattr(settings, 'GOOGLE_CLOUD_CLIENT_ID', None)
+        client_secret = getattr(settings, 'GOOGLE_CLOUD_CLIENT_SECRET', None)
+        expiry = os.environ.get('GOOGLE_CLOUD_EXPIRY') or getattr(settings, 'GOOGLE_CLOUD_EXPIRY', None)
 
-        if not creds or not creds.valid:
+        if not refresh_token or not client_id or not client_secret:
+            return None
 
-            if creds and creds.expired and creds.refresh_token:
-                try:
-                    creds.refresh(Request())
-                    save_credentials(creds)
-                except:
-                    print("NOT OK")
-                    return None
-            
-            return creds
+        creds = Credentials.from_authorized_user_info({
+            'token': token,
+            'refresh_token': refresh_token,
+            'token_uri': token_uri,
+            'client_id': client_id,
+            'client_secret': client_secret,
+            'expiry': expiry,
+        }, scopes=settings.SCOPES)
 
+        if not creds.valid or creds.expired:
+            try:
+                creds.refresh(Request())
+                save_credentials(creds)
+            except Exception as e:
+                print(f"Token refresh failed: {e}")
+                return None
+
+        _cached_credentials = creds
         return creds

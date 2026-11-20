@@ -1,0 +1,33 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}SPARC 2026{% endblock %}</title>
+  <link rel="stylesheet" href="{% static 'ambassador/css/form.css' %}">
+</head>
+<body>
+
+<canvas id="constellation-canvas"></canvas>
+
+<header class="site-head">
+  <div class="site-head-inner">
+    <img class="brand-logo" src="/media_files/SPARC26LogoMin.png" alt="SPARC 2026 logo">
+    <div class="brand-text">
+      <strong>SPARC 2026</strong>
+      <span>IEEE NSU Student Branch</span>
+    </div>
+  </div>
+</header>
+
+<main>
+  {% block content %}{% endblock %}
+</main>
+
+<footer class="site-foot">2026 &copy; All rights reserved by IEEE NSU Student Branch</footer>
+
+<script src="{% static 'ambassador/js/constellation.js' %}" defer></script>
+<script src="{% static 'ambassador/js/form.js' %}" defer></script>
+</body>
+</html>

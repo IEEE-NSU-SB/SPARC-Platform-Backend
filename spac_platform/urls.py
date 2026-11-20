@@ -28,10 +28,16 @@ urlpatterns = [
     path('', include('emails.urls')),
     path('', include('registration.urls')),
     path('hackathon/', include('hackathon.urls')),
+    path('ambassador/', include('ambassador_registration.urls')),
     re_path(r'^protected/(?P<path>.*)$', protected_serve, name="protected_serve"),
     re_path(r'^media_files/(?P<path>.*)$', serve,{'document_root': settings.MEDIA_ROOT}), 
     re_path(r'^static/(?P<path>.*)$', serve,{'document_root': settings.STATIC_ROOT}),
 ]
+
+if settings.DEBUG:
+    from django.contrib.staticfiles.urls import staticfiles_urlpatterns
+    urlpatterns = staticfiles_urlpatterns() + urlpatterns
+
 
 # urlpatterns+=static(settings.MEDIA_URL,document_root=settings.MEDIA_ROOT)
 # urlpatterns+=static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
