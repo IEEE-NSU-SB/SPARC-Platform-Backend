@@ -4,16 +4,20 @@
 {% block title %}SPARC Ambassador Application 2026{% endblock %}
 
 {% block content %}
-<div class="page">
-
-  <div class="form-banner">
-    <img src="{% static 'ambassador/images/spac_phase1_banner.png' %}" alt="SPARC 2026 Banner">
-  </div>
-
-  <div class="form-body">
-    <header class="form-head">
-      <h1>SPARC Ambassador Application 2026</h1>
-      <p class="intro">
+<div
+  class="bg-[#d3e4f7] w-11/12 md:w-3/5 mx-auto"
+  style="
+    backdrop-filter: blur(7px);
+    border-radius: 4px 4px;
+    box-shadow: 0 2px 6px 0px #00000078;
+  "
+>
+  <div class="shadow-md p-5 sm:p-8 font-medium rounded-md">
+    <header class="form-head mb-6">
+      <h2 class="md:text-3xl text-xl text-center mb-5 font-bold text-[#122812]">
+        SPARC Ambassador Application 2026
+      </h2>
+      <p class="text-justify text-[#122812] mb-4 leading-relaxed">
         Thank you for your interest in becoming a SPARC Ambassador. Ambassadors
         represent SPARC at their university, promote events, and earn points
         through tasks. Top-ranked ambassadors get special recognition. Photo and
@@ -21,9 +25,9 @@
         told by email and get a unique Ambassador Code.
       </p>
 
-      <div class="photo-guide-intro">
-        <p class="guide-title"><strong>Photo guide:</strong></p>
-        <ul class="guide-list">
+      <div class="photo-guide-intro mb-4 text-[#122812]">
+        <p class="guide-title font-bold mb-1">Photo guide:</p>
+        <ul class="guide-list list-disc ml-5 text-sm space-y-1">
           <li>formal attire, plain light background, face clearly visible and looking at the camera, no sunglasses or filters, clear and high resolution.</li>
         </ul>
       </div>
@@ -36,91 +40,99 @@
       {{ form.non_field_errors }}
 
       <!-- ============ Personal & University information ============ -->
-      <section class="card card-section">
-        <div class="field" data-field="name">
-          <label for="{{ form.name.id_for_label }}"><span class="q-no">1</span> Full name (as on your ID) <span class="req" title="Required">*</span></label>
+      <section class="card-section mb-6">
+        <hr class="my-6 w-[100%] m-auto text-gray-400">
+        <h2 class="section_heading">PERSONAL &amp; UNIVERSITY INFORMATION</h2>
+
+        <div class="mb-5 field" data-field="name">
+          <label for="{{ form.name.id_for_label }}" class="input_label">Full name (as on your ID) <span class="text-red-700 ml-1" title="Required">*</span></label>
           {{ form.name }}
           {{ form.name.errors }}
         </div>
-        <div class="field" data-field="email">
-          <label for="{{ form.email.id_for_label }}"><span class="q-no">2</span> Email address <span class="req">*</span> <span class="muted">(all updates go here)</span></label>
+        <div class="mb-5 field" data-field="email">
+          <label for="{{ form.email.id_for_label }}" class="input_label">Email address <span class="text-red-700 ml-1">*</span> <span class="text-sm text-gray-600 font-normal">(all updates go here)</span></label>
           {{ form.email }}
           {{ form.email.errors }}
         </div>
 
-        <div class="field" data-field="whatsapp">
-          <label for="{{ form.whatsapp.id_for_label }}"><span class="q-no">3</span> WhatsApp number <span class="req">*</span></label>
+        <div class="mb-5 field" data-field="whatsapp">
+          <label for="{{ form.whatsapp.id_for_label }}" class="input_label">WhatsApp number <span class="text-red-700 ml-1">*</span></label>
           {{ form.whatsapp }}
           {{ form.whatsapp.errors }}
         </div>
-        <div class="field" data-field="date_of_birth">
-          <label for="{{ form.date_of_birth.id_for_label }}"><span class="q-no">4</span> Date of birth <span class="req">*</span></label>
+        <div class="mb-5 field" data-field="date_of_birth">
+          <label for="{{ form.date_of_birth.id_for_label }}" class="input_label">Date of birth <span class="text-red-700 ml-1">*</span></label>
           {{ form.date_of_birth }}
           {{ form.date_of_birth.errors }}
         </div>
 
-        <fieldset class="field choice-group" data-field="gender">
-          <legend><span class="q-no">5</span> Gender <span class="req">*</span></legend>
-          {% for radio in form.gender %}
-            <label class="choice">{{ radio.tag }} {{ radio.choice_label }}</label>
-          {% endfor %}
+        <fieldset class="mb-5 field choice-group" data-field="gender">
+          <legend class="input_label">Gender <span class="text-red-700 ml-1">*</span></legend>
+          <div class="flex flex-wrap gap-4 mt-2">
+            {% for radio in form.gender %}
+              <label class="choice">{{ radio.tag }} <span class="text-lg">{{ radio.choice_label }}</span></label>
+            {% endfor %}
+          </div>
           {{ form.gender.errors }}
         </fieldset>
 
-        <div class="field" data-field="university">
-          <label for="{{ form.university.id_for_label }}"><span class="q-no">7</span> University name <span class="req">*</span></label>
+        <div class="mb-5 field" data-field="university">
+          <label for="{{ form.university.id_for_label }}" class="input_label">University name <span class="text-red-700 ml-1">*</span></label>
           {{ form.university }}
           {{ form.university.errors }}
         </div>
-        <div class="field" data-field="department">
-          <label for="{{ form.department.id_for_label }}"><span class="q-no">8</span> Department <span class="req">*</span></label>
+        <div class="mb-5 field" data-field="department">
+          <label for="{{ form.department.id_for_label }}" class="input_label">Department <span class="text-red-700 ml-1">*</span></label>
           {{ form.department }}
           {{ form.department.errors }}
         </div>
 
-        <div class="field" data-field="year_of_study">
-          <label for="{{ form.year_of_study.id_for_label }}"><span class="q-no">9</span> Current year of study <span class="req">*</span></label>
+        <div class="mb-5 field" data-field="year_of_study">
+          <label for="{{ form.year_of_study.id_for_label }}" class="input_label">Current year of study <span class="text-red-700 ml-1">*</span></label>
           {{ form.year_of_study }}
           {{ form.year_of_study.errors }}
         </div>
-        <div class="field" data-field="student_id">
-          <label for="{{ form.student_id.id_for_label }}"><span class="q-no">10</span> Student ID number <span class="req">*</span></label>
+        <div class="mb-5 field" data-field="student_id">
+          <label for="{{ form.student_id.id_for_label }}" class="input_label">Student ID number <span class="text-red-700 ml-1">*</span></label>
           {{ form.student_id }}
           {{ form.student_id.errors }}
         </div>
       </section>
 
       <!-- ============ Section 3: IEEE information ============ -->
-      <section class="card card-section">
-        <h2><span class="sec-no">Section 3</span>IEEE information</h2>
+      <section class="card-section mb-6">
+        <hr class="my-6 w-[100%] m-auto text-gray-400">
+        <h2 class="section_heading"><span class="sec-no">Section 3:</span> IEEE Information</h2>
 
-        <fieldset class="field choice-group" data-field="is_ieee_member">
-          <legend><span class="q-no">12</span> Are you an IEEE member? <span class="req">*</span></legend>
-          {% for radio in form.is_ieee_member %}
-            <label class="choice">{{ radio.tag }} {{ radio.choice_label }}</label>
-          {% endfor %}
+        <fieldset class="mb-5 field choice-group" data-field="is_ieee_member">
+          <legend class="input_label">Are you an IEEE member? <span class="text-red-700 ml-1">*</span></legend>
+          <div class="flex flex-wrap gap-4 mt-2">
+            {% for radio in form.is_ieee_member %}
+              <label class="choice">{{ radio.tag }} <span class="text-lg">{{ radio.choice_label }}</span></label>
+            {% endfor %}
+          </div>
           {{ form.is_ieee_member.errors }}
         </fieldset>
 
         {# Shown/required only when the answer above is Yes (JS toggle here, form validation). #}
         <div id="ieee-fields" hidden>
-          <div class="field" data-field="ieee_number">
-            <label for="{{ form.ieee_number.id_for_label }}"><span class="q-no">13</span> IEEE membership number <span class="req">*</span></label>
+          <div class="mb-5 field" data-field="ieee_number">
+            <label for="{{ form.ieee_number.id_for_label }}" class="input_label">IEEE membership number <span class="text-red-700 ml-1">*</span></label>
             {{ form.ieee_number }}
             {{ form.ieee_number.errors }}
           </div>
-          <div class="field" data-field="ieee_grade">
-            <label for="{{ form.ieee_grade.id_for_label }}"><span class="q-no">14</span> IEEE membership grade <span class="req">*</span></label>
+          <div class="mb-5 field" data-field="ieee_grade">
+            <label for="{{ form.ieee_grade.id_for_label }}" class="input_label">IEEE membership grade <span class="text-red-700 ml-1">*</span></label>
             {{ form.ieee_grade }}
             {{ form.ieee_grade.errors }}
           </div>
-          <div class="field" data-field="ieee_branch">
-            <label for="{{ form.ieee_branch.id_for_label }}"><span class="q-no">15</span> IEEE Student Branch name <span class="req">*</span></label>
+          <div class="mb-5 field" data-field="ieee_branch">
+            <label for="{{ form.ieee_branch.id_for_label }}" class="input_label">IEEE Student Branch name <span class="text-red-700 ml-1">*</span></label>
             {{ form.ieee_branch }}
             {{ form.ieee_branch.errors }}
           </div>
-          <div class="field" data-field="ieee_position">
-            <label for="{{ form.ieee_position.id_for_label }}"><span class="q-no">16</span> Your position in the branch, if any <span class="req">*</span></label>
+          <div class="mb-5 field" data-field="ieee_position">
+            <label for="{{ form.ieee_position.id_for_label }}" class="input_label">Your position in the branch, if any <span class="text-red-700 ml-1">*</span></label>
             {{ form.ieee_position }}
             {{ form.ieee_position.errors }}
           </div>
@@ -128,80 +140,89 @@
       </section>
 
       <!-- ============ Section 4: Photo for website, social media and ID ============ -->
-      <section class="card card-section">
-        <h2><span class="sec-no">Section 4</span>Photo for website, social media and ID</h2>
+      <section class="card-section mb-6">
+        <hr class="my-6 w-[100%] m-auto text-gray-400">
+        <h2 class="section_heading"><span class="sec-no">Section 4:</span> Photo for website, social media and ID</h2>
 
-        <div class="field" data-field="photo">
-          <label for="{{ form.photo.id_for_label }}"><span class="q-no">19</span> Upload your formal photo <span class="req">*</span></label>
+        <div class="mb-5 field" data-field="photo">
+          <label for="{{ form.photo.id_for_label }}" class="input_label">Upload your formal photo <span class="text-red-700 ml-1">*</span></label>
           {{ form.photo }}
           <p class="hint">JPG or PNG, 1 file, max 10 MB.</p>
           <p class="file-error" id="photo-error" hidden></p>
           {{ form.photo.errors }}
         </div>
 
-        <div class="field" data-field="bio">
-          <label for="{{ form.bio.id_for_label }}"><span class="q-no">20</span> Short bio for the website <span class="req">*</span></label>
+        <div class="mb-5 field" data-field="bio">
+          <label for="{{ form.bio.id_for_label }}" class="input_label">Short bio for the website <span class="text-red-700 ml-1">*</span></label>
           {{ form.bio }}
-          <p class="word-counter" id="bio-counter" data-max="50">0 / 50 words</p>
+          <div class="flex justify-between items-center mt-1">
+            <p class="word-counter" id="bio-counter" data-max="50">0 / 50 words</p>
+          </div>
           {{ form.bio.errors }}
         </div>
       </section>
 
       <!-- ============ Section 6: About you ============ -->
-      <section class="card card-section">
-        <h2><span class="sec-no">Section 6</span>About you</h2>
+      <section class="card-section mb-6">
+        <hr class="my-6 w-[100%] m-auto text-gray-400">
+        <h2 class="section_heading"><span class="sec-no">Section 6:</span> About you</h2>
 
-        <div class="field" data-field="why_ambassador">
-          <label for="{{ form.why_ambassador.id_for_label }}"><span class="q-no">27</span> Why do you want to become a SPARC Ambassador? <span class="req">*</span></label>
+        <div class="mb-5 field" data-field="why_ambassador">
+          <label for="{{ form.why_ambassador.id_for_label }}" class="input_label">Why do you want to become a SPARC Ambassador? <span class="text-red-700 ml-1">*</span></label>
           {{ form.why_ambassador }}
           {{ form.why_ambassador.errors }}
         </div>
 
-        <fieldset class="field choice-group choice-stack" data-field="activities">
-          <legend><span class="q-no">28</span> Which activities are you comfortable with?</legend>
-          {% for box in form.activities %}
-            <label class="choice">{{ box.tag }} {{ box.choice_label }}</label>
-          {% endfor %}
+        <fieldset class="mb-5 field choice-group choice-stack" data-field="activities">
+          <legend class="input_label">Which activities are you comfortable with?</legend>
+          <div class="flex flex-col gap-2 mt-2">
+            {% for box in form.activities %}
+              <label class="choice">{{ box.tag }} <span class="text-lg">{{ box.choice_label }}</span></label>
+            {% endfor %}
+          </div>
           {{ form.activities.errors }}
         </fieldset>
 
-        <fieldset class="field choice-group" data-field="heard_from">
-          <legend><span class="q-no">29</span> How did you hear about SPARC? <span class="req">*</span></legend>
-          {% for radio in form.heard_from %}
-            <label class="choice">{{ radio.tag }} {{ radio.choice_label }}</label>
-          {% endfor %}
+        <fieldset class="mb-5 field choice-group" data-field="heard_from">
+          <legend class="input_label">How did you hear about SPARC? <span class="text-red-700 ml-1">*</span></legend>
+          <div class="flex flex-wrap gap-4 mt-2">
+            {% for radio in form.heard_from %}
+              <label class="choice">{{ radio.tag }} <span class="text-lg">{{ radio.choice_label }}</span></label>
+            {% endfor %}
+          </div>
           {{ form.heard_from.errors }}
         </fieldset>
       </section>
 
       <!-- ============ Section 7: Agreement ============ -->
-      <section class="card card-section">
-        <h2><span class="sec-no">Section 7</span>Agreement <span class="muted">(all four required)</span></h2>
+      <section class="card-section mb-6">
+        <hr class="my-6 w-[100%] m-auto text-gray-400">
+        <h2 class="section_heading"><span class="sec-no">Section 7:</span> Agreement <span class="text-sm font-normal text-gray-600">(all four required)</span></h2>
 
-        <div class="field agree-field" data-field="agree_info_accurate">
-          <label class="choice agree">{{ form.agree_info_accurate }} <span><span class="q-no">33</span> {{ form.agree_info_accurate.label }} <span class="req">*</span></span></label>
+        <div class="mb-3 field agree-field" data-field="agree_info_accurate">
+          <label class="choice agree">{{ form.agree_info_accurate }} <span>{{ form.agree_info_accurate.label }} <span class="text-red-700 ml-1">*</span></span></label>
           {{ form.agree_info_accurate.errors }}
         </div>
 
-        <div class="field agree-field" data-field="agree_media_usage">
-          <label class="choice agree">{{ form.agree_media_usage }} <span><span class="q-no">34</span> {{ form.agree_media_usage.label }} <span class="req">*</span></span></label>
+        <div class="mb-3 field agree-field" data-field="agree_media_usage">
+          <label class="choice agree">{{ form.agree_media_usage }} <span>{{ form.agree_media_usage.label }} <span class="text-red-700 ml-1">*</span></span></label>
           {{ form.agree_media_usage.errors }}
         </div>
 
-        <div class="field agree-field" data-field="agree_points_ranking">
-          <label class="choice agree">{{ form.agree_points_ranking }} <span><span class="q-no">35</span> {{ form.agree_points_ranking.label }} <span class="req">*</span></span></label>
+        <div class="mb-3 field agree-field" data-field="agree_points_ranking">
+          <label class="choice agree">{{ form.agree_points_ranking }} <span>{{ form.agree_points_ranking.label }} <span class="text-red-700 ml-1">*</span></span></label>
           {{ form.agree_points_ranking.errors }}
         </div>
 
-        <div class="field agree-field" data-field="agree_contact_consent">
-          <label class="choice agree">{{ form.agree_contact_consent }} <span><span class="q-no">36</span> {{ form.agree_contact_consent.label }} <span class="req">*</span></span></label>
+        <div class="mb-3 field agree-field" data-field="agree_contact_consent">
+          <label class="choice agree">{{ form.agree_contact_consent }} <span>{{ form.agree_contact_consent.label }} <span class="text-red-700 ml-1">*</span></span></label>
           {{ form.agree_contact_consent.errors }}
         </div>
       </section>
 
-      <div class="submit-row">
-        <button type="submit" id="submit-btn" class="btn">Submit application</button>
-        <p class="hint">Selected applicants are notified by email with their unique Ambassador Code.</p>
+      <div class="flex flex-col items-center justify-center mt-8 mb-4 submit-row">
+        <button type="submit" id="submit-btn" class="continue-btn">Submit application</button>
+        <p class="hint text-center mt-2">Selected applicants are notified by email with their unique Ambassador Code.</p>
       </div>
     </form>
 
@@ -210,6 +231,5 @@
       {% include "ambassador_registration/_confirmation.html" %}
     </div>
   </div>
-
 </div>
 {% endblock %}

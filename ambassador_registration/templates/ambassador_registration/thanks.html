@@ -3,11 +3,24 @@
 {% block title %}Application received · SPARC 2026{% endblock %}
 
 {% block content %}
-<div class="page">
-  {# Non-JavaScript fallback: the same confirmation message, rendered server-side. #}
-  <div class="confirmation">
-    {% include "ambassador_registration/_confirmation.html" %}
+<div
+  class="bg-[#d3e4f7] w-11/12 md:w-3/5 mx-auto"
+  style="
+    backdrop-filter: blur(7px);
+    border-radius: 4px 4px;
+    box-shadow: 0 2px 6px 0px #00000078;
+  "
+>
+  <div class="shadow-md p-5 sm:p-8 font-medium rounded-md">
+    {# Non-JavaScript fallback: the same confirmation message, rendered server-side. #}
+    <div class="confirmation">
+      {% include "ambassador_registration/_confirmation.html" %}
+    </div>
+    <div class="flex justify-center mt-6">
+      <a href="{% url 'ambassador_registration:ambassador_apply' %}" class="continue-btn">
+        Back to the application form
+      </a>
+    </div>
   </div>
-  <p class="back-link"><a href="{% url 'ambassador_registration:ambassador_apply' %}">Back to the application form</a></p>
 </div>
 {% endblock %}

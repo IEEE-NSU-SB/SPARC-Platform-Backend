@@ -1,13 +1,6 @@
 /* ============================================================
-   SPARC 2026 - Ambassador form behaviours
-   1. IEEE fields show/hide (PDF: fields 13-16 only if member = Yes)
-   2. Live 50-word bio counter; submit blocked while over the limit
-   3. Photo pre-check: JPG/PNG only, max 10 MB (client-side; the
-      server re-checks everything in Phase 3)
-   4. AJAX submit with loading state; renders the exact PDF
-      confirmation message on success; falls back to a normal
-      browser submit if the server does not answer with JSON
-      (the JSON contract {success, message, errors} is fixed in Phase 3)
+   SPARC 2026 - Ambassador Form Behaviours
+   Interactive form UX matching Phase 1, Phase 2, & Hackathon
    ============================================================ */
 (function () {
   'use strict';
@@ -22,7 +15,7 @@
   var photoError = document.getElementById('photo-error');
   var submitBtn = document.getElementById('submit-btn');
   var MAX_WORDS = counter ? parseInt(counter.getAttribute('data-max'), 10) || 50 : 50;
-  var MAX_FILE_BYTES = 10 * 1024 * 1024; // 10 MB, per the PDF
+  var MAX_FILE_BYTES = 10 * 1024 * 1024; // 10 MB, per the spec
 
   /* ---------- 1. IEEE toggle ---------- */
 
@@ -31,11 +24,16 @@
     var chosen = form.querySelector('input[name="is_ieee_member"]:checked');
     var isMember = !!chosen && chosen.value === 'True';
     ieeeFields.hidden = !isMember;
-    // Disabled fields are skipped by the browser and by screen readers,
-    // and they are simply absent from FormData - which matches the
-    // server rule "required only when the applicant is a member".
+
     var els = ieeeFields.querySelectorAll('input, select, textarea');
-    for (var i = 0; i < els.length; i++) els[i].disabled = !isMember;
+    for (var i = 0; i < els.length; i++) {
+      els[i].disabled = !isMember;
+      if (isMember) {
+        els[i].required = true;
+      } else {
+        els[i].required = false;
+      }
+    }
   }
 
   var ieeeRadios = form.querySelectorAll('input[name="is_ieee_member"]');
@@ -73,10 +71,19 @@
   /* ---------- 3. Photo pre-check ---------- */
 
   function showPhotoError(message) {
-    if (!photoError) return;
-    photoError.textContent = message;
-    photoError.hidden = false;
-    if (photo) photo.value = ''; // drop the rejected file
+    if (photoError) {
+      photoError.textContent = message;
+      photoError.hidden = false;
+    }
+    if (typeof Swal !== 'undefined') {
+      Swal.fire({
+        icon: 'error',
+        title: 'Invalid Photo',
+        text: message,
+        confirmButtonColor: '#00629B',
+      });
+    }
+    if (photo) photo.value = '';
   }
 
   function syncPhoto() {
@@ -90,8 +97,7 @@
     if (!(typeOk && nameOk)) {
       showPhotoError('Please upload a JPG or PNG image.');
     } else if (f.size > MAX_FILE_BYTES) {
-      showPhotoError('Photo is too large (' + (f.size / 1048576).toFixed(1) +
-                     ' MB). Maximum is 10 MB.');
+      showPhotoError('Photo is too large (' + (f.size / 1048576).toFixed(1) + ' MB). Maximum is 10 MB.');
     }
   }
 
@@ -112,7 +118,7 @@
 
   function nativeSubmit() {
     form.setAttribute('data-native-submit', 'true');
-    form.submit(); // normal browser POST (page reloads)
+    form.submit();
   }
 
   function showConfirmation() {
@@ -129,10 +135,9 @@
   }
 
   function renderErrors(errors) {
-    // Contract (Phase 3): { fieldName: ["message", ...], ... }
     var lists = form.querySelectorAll('.errorlist');
     for (var i = 0; i < lists.length; i++) {
-      if (lists[i].hasAttribute('data-server')) continue; // keep server-rendered ones
+      if (lists[i].hasAttribute('data-server')) continue;
       lists[i].parentNode.removeChild(lists[i]);
     }
     var first = null;
@@ -162,16 +167,35 @@
   form.addEventListener('submit', function (e) {
     if (form.getAttribute('data-native-submit') === 'true') return;
 
-    // Guard: bio over the 50-word limit blocks submission.
+    // Guard: bio over 50 words
     if (form.getAttribute('data-bio-over') === 'true') {
       e.preventDefault();
+      if (typeof Swal !== 'undefined') {
+        Swal.fire({
+          icon: 'warning',
+          title: 'Bio too long',
+          text: 'The bio must be 50 words or fewer.',
+          confirmButtonColor: '#00629B',
+        });
+      }
       if (bio) bio.focus();
       return;
     }
 
-    // AJAX path.
+    // AJAX path
     e.preventDefault();
     setBusy(true);
+
+    if (typeof Swal !== 'undefined') {
+      Swal.fire({
+        title: "Submitting...",
+        text: "Submitting your application. Please wait.",
+        allowOutsideClick: false,
+        didOpen: () => {
+          Swal.showLoading();
+        },
+      });
+    }
 
     fetch(form.action, {
       method: 'POST',
@@ -186,12 +210,31 @@
       })
       .then(function (r) {
         if (r.ok && r.data && r.data.success) {
-          showConfirmation();
+          if (typeof Swal !== 'undefined') {
+            Swal.fire({
+              icon: "success",
+              title: "Application Received!",
+              text: "Thank you for applying to be a SPARC Ambassador!",
+              confirmButtonColor: "#00629B",
+            }).then(() => {
+              showConfirmation();
+            });
+          } else {
+            showConfirmation();
+          }
         } else if (r.data && r.data.errors) {
           setBusy(false);
           renderErrors(r.data.errors);
+          if (typeof Swal !== 'undefined') {
+            var msg = r.data.message || "Please fill in all the required fields correctly!";
+            Swal.fire({
+              icon: "error",
+              title: "Submission Incomplete",
+              text: msg,
+              confirmButtonColor: "#00629B",
+            });
+          }
         } else {
-          // Not our JSON contract -> normal submit keeps the user safe.
           nativeSubmit();
         }
       })

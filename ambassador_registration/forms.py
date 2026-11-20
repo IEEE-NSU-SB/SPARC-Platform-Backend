@@ -54,6 +54,35 @@ class AmbassadorForm(forms.ModelForm):
         widget=forms.RadioSelect,
     )
 
+    # Gender radio group without empty '---------' choice, unselected by default
+    gender = forms.ChoiceField(
+        label='Gender',
+        choices=Ambassador.GENDER_CHOICES,
+        widget=forms.RadioSelect,
+    )
+
+    # How did you hear about SPARC radio group without empty '---------' choice, unselected by default
+    heard_from = forms.ChoiceField(
+        label='How did you hear about SPARC?',
+        choices=Ambassador.HEARD_FROM_CHOICES,
+        widget=forms.RadioSelect,
+    )
+
+    # Current year of study with blank placeholder instead of '---------'
+    year_of_study = forms.ChoiceField(
+        label='Current year of study',
+        choices=[('', '')] + Ambassador.YEAR_CHOICES,
+        widget=forms.Select(attrs={'class': 'input'}),
+    )
+
+    # IEEE membership grade with blank placeholder
+    ieee_grade = forms.ChoiceField(
+        label='IEEE membership grade',
+        choices=[('', '')] + Ambassador.IEEE_GRADE_CHOICES,
+        required=False,
+        widget=forms.Select(attrs={'class': 'input'}),
+    )
+
     # Model stores a JSONField; the form exposes it as the PDF's checkbox
     # list. On save the cleaned list is stored as JSON in the model field.
     activities = forms.MultipleChoiceField(
