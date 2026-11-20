@@ -41,7 +41,7 @@ def send_mail(service, to, name):
         userId='me', body={'raw': raw}).execute()['id']
 
 
-def process_job(job_id, service=None):
+def process_job(job_id, service=None, force=False):
     try:
         job = MailJob.objects.select_related('ambassador').get(pk=job_id)
     except MailJob.DoesNotExist:
@@ -50,10 +50,13 @@ def process_job(job_id, service=None):
 
     # Atomic claim: a single conditional UPDATE means exactly one processor
     # (view thread / send_pending / admin action) can win.
-    claimed = MailJob.objects.filter(
-        pk=job.pk,
-        status__in=[MailJob.PENDING, MailJob.SENDING, MailJob.FAILED],
-    ).update(status=MailJob.SENDING)
+    if force:
+        claimed = MailJob.objects.filter(pk=job.pk).update(status=MailJob.SENDING)
+    else:
+        claimed = MailJob.objects.filter(
+            pk=job.pk,
+            status__in=[MailJob.PENDING, MailJob.SENDING, MailJob.FAILED],
+        ).update(status=MailJob.SENDING)
     if not claimed:
         return job  # already SENT - never send twice
 

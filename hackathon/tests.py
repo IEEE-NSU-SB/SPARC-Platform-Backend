@@ -618,10 +618,11 @@ class HackathonPhase02TestCase(TestCase):
             is_staff=True,
         )
         perm, _ = Permission.objects.get_or_create(
-            permission_name="reg_form_control",
-            defaults={"permission_name": "reg_form_control"},
+            codename="reg_form_control",
+            defaults={"name": "reg_form_control"},
         )
-        UserPermission.objects.get_or_create(user=self.admin_user, permission=perm)
+        user_perm, _ = UserPermission.objects.get_or_create(user=self.admin_user)
+        user_perm.permissions.add(perm)
 
         # Publish status
         HackathonFormStatus_Phase01.objects.create(is_published=True)
@@ -692,7 +693,7 @@ class HackathonPhase02TestCase(TestCase):
         self.assertContains(response, "Algorunners")
         self.assertContains(response, "Leader Algo")
         self.assertContains(response, "Member Algo")
-        self.assertContains(response, "Select T-Shirt Size")
+        self.assertContains(response, "Select T-Shirt size")
 
     def test_phase2_admin_preview(self):
         """Staff with permission can preview Phase 2 form regardless of public publish state."""
@@ -779,10 +780,11 @@ class HackathonPhase02TestCase(TestCase):
     def test_phase2_response_table_view(self):
         """Staff with view_reg_responses_list can view Phase 2 response table."""
         perm, _ = Permission.objects.get_or_create(
-            permission_name="view_reg_responses_list",
-            defaults={"permission_name": "view_reg_responses_list"},
+            codename="view_reg_responses_list",
+            defaults={"name": "view_reg_responses_list"},
         )
-        UserPermission.objects.get_or_create(user=self.admin_user, permission=perm)
+        user_perm, _ = UserPermission.objects.get_or_create(user=self.admin_user)
+        user_perm.permissions.add(perm)
         self.client.force_login(self.admin_user)
 
         # Create a Phase 2 team
@@ -835,10 +837,11 @@ class HackathonPhase02TestCase(TestCase):
     def test_phase2_view_response_details(self):
         """Staff can view detailed single-team Phase 2 page."""
         perm, _ = Permission.objects.get_or_create(
-            permission_name="view_reg_response",
-            defaults={"permission_name": "view_reg_response"},
+            codename="view_reg_response",
+            defaults={"name": "view_reg_response"},
         )
-        UserPermission.objects.get_or_create(user=self.admin_user, permission=perm)
+        user_perm, _ = UserPermission.objects.get_or_create(user=self.admin_user)
+        user_perm.permissions.add(perm)
         self.client.force_login(self.admin_user)
 
         p2_team = HackathonTeam_Phase02.objects.create(

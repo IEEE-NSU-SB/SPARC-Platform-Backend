@@ -422,6 +422,64 @@ class AdminActionTests(StaffLoginMixin):
         self.assertIn('Nothing to send - selection contains only '
                       'already-sent jobs.', self.admin_messages(response))
 
+    def test_force_resend_selected_action(self):
+        amb = make_ambassador(name='Admin Force Done')
+        job = make_job(amb, status=MailJob.SENT)
+        service = FakeService()
+        with mock.patch.object(emails_admin, 'build_service', return_value=service):
+            response = self.client.post(
+                '/admin/ambassador_email/mailjob/',
+                {
+                    'action': 'force_resend_selected',
+                    '_selected_action': [str(job.id)],
+                    'index': '0',
+                    'select_across': '0'
+                },
+                follow=True
+            )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(service.bodies), 1)
+        self.assertIn('Force send finished: 1 sent, 0 failed.', self.admin_messages(response))
+
+    def test_reset_to_pending_action(self):
+        amb = make_ambassador(name='Admin Reset')
+        job = make_job(amb, status=MailJob.FAILED)
+        response = self.client.post(
+            '/admin/ambassador_email/mailjob/',
+            {
+                'action': 'reset_to_pending',
+                '_selected_action': [str(job.id)],
+                'index': '0',
+                'select_across': '0'
+            },
+            follow=True
+        )
+        self.assertEqual(response.status_code, 200)
+        job.refresh_from_db()
+        self.assertEqual(job.status, MailJob.PENDING)
+        self.assertEqual(job.error, '')
+
+    def test_single_job_resend_endpoint(self):
+        amb = make_ambassador(name='Admin Single')
+        job = make_job(amb, status=MailJob.FAILED)
+        service = FakeService()
+        with mock.patch.object(emails_admin, 'build_service', return_value=service):
+            response = self.client.get(
+                f'/admin/ambassador_email/mailjob/{job.id}/resend/',
+                follow=True
+            )
+        self.assertEqual(response.status_code, 200)
+        job.refresh_from_db()
+        self.assertEqual(job.status, MailJob.SENT)
+        self.assertEqual(len(service.bodies), 1)
+
+    def test_change_form_renders_with_resend_link(self):
+        amb = make_ambassador(name='Change Form Job')
+        job = make_job(amb, status=MailJob.FAILED)
+        response = self.client.get(f'/admin/ambassador_email/mailjob/{job.id}/change/')
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'Send / Retry Email Now')
+
 
 # ----------------------------------------------------------------------
 # logging

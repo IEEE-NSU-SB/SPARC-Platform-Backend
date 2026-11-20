@@ -110,9 +110,9 @@ class MediaRootMixin:
         self.addCleanup(shutil.rmtree, self._media_root, True)
 
 
-def make_ambassador(email='db@example.com', photo='ambassador_photos/db.jpg'):
+def make_ambassador(email='db@example.com', photo='ambassador_photos/db.jpg', name='DB Applicant'):
     return Ambassador.objects.create(
-        name='DB Applicant', email=email, whatsapp='+8801700000000',
+        name=name, email=email, whatsapp='+8801700000000',
         date_of_birth='2000-01-01', gender='female', university='NSU',
         department='CSE', year_of_study='2nd', student_id='ID-1',
         photo=photo, bio='b', why_ambassador='w', activities=[],
@@ -414,3 +414,100 @@ class AdminTests(MediaRootMixin, TestCase):
             self.client.get('/admin/ambassador_registration/ambassador/').status_code, 200)
         self.assertEqual(
             self.client.get('/admin/ambassador_email/mailjob/').status_code, 200)
+
+    def test_ambassador_admin_resend_action_sends_pending_and_failed(self):
+        from ambassador_email.tests import FakeService
+        import ambassador_registration.admin as amb_admin
+
+        amb1 = make_ambassador(email='pending@example.com', name='Pending User')
+        amb2 = make_ambassador(email='failed@example.com', name='Failed User')
+        job1 = MailJob.objects.create(campaign='ambassador_received', ambassador=amb1, to_email=amb1.email, status=MailJob.PENDING)
+        job2 = MailJob.objects.create(campaign='ambassador_received', ambassador=amb2, to_email=amb2.email, status=MailJob.FAILED, error='error')
+
+        service = FakeService()
+        with mock.patch.object(amb_admin, 'build_service', return_value=service):
+            res = self.client.post(
+                '/admin/ambassador_registration/ambassador/',
+                {
+                    'action': 'resend_failed_emails',
+                    '_selected_action': [str(amb1.id), str(amb2.id)],
+                    'index': '0',
+                    'select_across': '0'
+                },
+                follow=True
+            )
+        self.assertEqual(res.status_code, 200)
+        job1.refresh_from_db()
+        job2.refresh_from_db()
+        self.assertEqual(job1.status, MailJob.SENT)
+        self.assertEqual(job2.status, MailJob.SENT)
+        self.assertEqual(len(service.bodies), 2)
+
+    def test_ambassador_admin_force_resend_action(self):
+        from ambassador_email.tests import FakeService
+        import ambassador_registration.admin as amb_admin
+
+        amb = make_ambassador(email='sent@example.com', name='Sent User')
+        job = MailJob.objects.create(campaign='ambassador_received', ambassador=amb, to_email=amb.email, status=MailJob.SENT, gmail_message_id='msg-001')
+
+        service = FakeService()
+        with mock.patch.object(amb_admin, 'build_service', return_value=service):
+            res = self.client.post(
+                '/admin/ambassador_registration/ambassador/',
+                {
+                    'action': 'force_resend_emails',
+                    '_selected_action': [str(amb.id)],
+                    'index': '0',
+                    'select_across': '0'
+                },
+                follow=True
+            )
+        self.assertEqual(res.status_code, 200)
+        job.refresh_from_db()
+        self.assertEqual(job.status, MailJob.SENT)
+        self.assertEqual(len(service.bodies), 1)
+
+    def test_ambassador_admin_single_resend_endpoint(self):
+        from ambassador_email.tests import FakeService
+        import ambassador_registration.admin as amb_admin
+
+        amb = make_ambassador(email='single@example.com', name='Single User')
+        job = MailJob.objects.create(campaign='ambassador_received', ambassador=amb, to_email=amb.email, status=MailJob.FAILED, error='boom')
+
+        service = FakeService()
+        with mock.patch.object(amb_admin, 'build_service', return_value=service):
+            res = self.client.get(
+                f'/admin/ambassador_registration/ambassador/{amb.id}/resend-email/',
+                follow=True
+            )
+        self.assertEqual(res.status_code, 200)
+        job.refresh_from_db()
+        self.assertEqual(job.status, MailJob.SENT)
+        self.assertEqual(len(service.bodies), 1)
+
+    def test_ambassador_admin_change_form_renders_inline(self):
+        amb = make_ambassador(name='Inline User')
+        MailJob.objects.create(
+            campaign='ambassador_received', ambassador=amb, to_email=amb.email,
+            status=MailJob.FAILED, error='Temporary failure'
+        )
+        res = self.client.get(f'/admin/ambassador_registration/ambassador/{amb.id}/change/')
+        self.assertEqual(res.status_code, 200)
+        self.assertContains(res, 'Temporary failure')
+        self.assertContains(res, 'FAILED')
+
+    def test_ambassador_admin_email_status_filter(self):
+        amb_failed = make_ambassador(email='fail@example.com')
+        MailJob.objects.create(campaign='ambassador_received', ambassador=amb_failed, to_email=amb_failed.email, status=MailJob.FAILED)
+        amb_sent = make_ambassador(email='ok@example.com')
+        MailJob.objects.create(campaign='ambassador_received', ambassador=amb_sent, to_email=amb_sent.email, status=MailJob.SENT)
+
+        res_failed = self.client.get('/admin/ambassador_registration/ambassador/?email_status=failed')
+        self.assertEqual(res_failed.status_code, 200)
+        self.assertContains(res_failed, amb_failed.email)
+        self.assertNotContains(res_failed, amb_sent.email)
+
+        res_sent = self.client.get('/admin/ambassador_registration/ambassador/?email_status=sent')
+        self.assertEqual(res_sent.status_code, 200)
+        self.assertContains(res_sent, amb_sent.email)
+        self.assertNotContains(res_sent, amb_failed.email)

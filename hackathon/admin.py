@@ -1,4 +1,4 @@
-from django.contrib import admin
+from django.contrib import admin, messages
 from .models import (
     HackathonFormStatus_Phase01,
     HackathonFormStatus_Phase02,
@@ -67,6 +67,17 @@ class HackathonTeamPhase01Admin(admin.ModelAdmin):
     )
     readonly_fields = ('created_at',)
     inlines = [HackathonMemberPhase01Inline]
+    actions = ('send_phase_2_email_selected',)
+
+    @admin.action(description='Send/Resend Phase-2 email to leader of selected teams (Selected only)')
+    def send_phase_2_email_selected(self, request, queryset):
+        teams = queryset.filter(is_selected=True)
+        if not teams.exists():
+            self.message_user(request, 'No selected teams in current selection.', level=messages.WARNING)
+            return
+        from emails.views import send_hackathon_phase02_email
+        send_hackathon_phase02_email(request, teams)
+        self.message_user(request, f'Phase 2 invitation email processing finished for {teams.count()} team(s).', level=messages.SUCCESS)
 
 
 @admin.register(HackathonFormStatus_Phase01)
