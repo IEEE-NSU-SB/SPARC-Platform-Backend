@@ -28,7 +28,7 @@ from PIL import Image
 from ambassador_email.models import MailJob
 
 from .forms import AmbassadorForm
-from .models import Ambassador
+from .models import Ambassador, AmbassadorFormStatus
 
 
 # ----------------------------------------------------------------------
@@ -276,6 +276,7 @@ class ViewTests(MediaRootMixin, TestCase):
     def setUp(self):
         super().setUp()
         cache.clear()
+        AmbassadorFormStatus.objects.create(is_published=True)
         self.url = reverse('ambassador_registration:ambassador_apply')
         self.thanks_url = reverse('ambassador_registration:thanks')
 
@@ -511,3 +512,131 @@ class AdminTests(MediaRootMixin, TestCase):
         self.assertEqual(res_sent.status_code, 200)
         self.assertContains(res_sent, amb_sent.email)
         self.assertNotContains(res_sent, amb_failed.email)
+
+
+class AmbassadorManagementTests(MediaRootMixin, TestCase):
+    """Tests for publish controls, admin preview, response table, detail view,
+    bulk selection, and 3-sheet Excel export."""
+
+    def setUp(self):
+        super().setUp()
+        cache.clear()
+        self.admin_user = User.objects.create_superuser(
+            'amb-admin', 'amb-admin@example.com', 'secret-123'
+        )
+        self.apply_url = reverse('ambassador_registration:ambassador_apply')
+        self.admin_url = reverse('ambassador_registration:admin_ambassador')
+        self.toggle_url = reverse('ambassador_registration:toggle_publish')
+        self.table_url = reverse('ambassador_registration:response_table')
+        self.save_url = reverse('ambassador_registration:save_selected')
+        self.excel_url = reverse('ambassador_registration:download_excel')
+
+    def test_unpublished_form_renders_closed_state_and_blocks_post(self):
+        AmbassadorFormStatus.objects.create(is_published=False)
+        res = self.client.get(self.apply_url)
+        self.assertEqual(res.status_code, 200)
+        self.assertContains(res, 'Registration is currently closed.')
+
+        post_res = self.client.post(
+            self.apply_url, full_post_payload(), HTTP_X_REQUESTED_WITH='XMLHttpRequest'
+        )
+        self.assertEqual(post_res.status_code, 403)
+        self.assertEqual(Ambassador.objects.count(), 0)
+
+    def test_staff_redirected_to_admin_and_can_preview_live_form(self):
+        AmbassadorFormStatus.objects.create(is_published=True)
+        self.client.force_login(self.admin_user)
+
+        res = self.client.get(self.apply_url)
+        self.assertRedirects(res, self.admin_url)
+
+        preview_res = self.client.get(f'{self.apply_url}?preview=1')
+        self.assertEqual(preview_res.status_code, 200)
+        self.assertFalse(preview_res.context['is_staff_view'])
+
+    def test_admin_view_and_toggle_publish(self):
+        make_ambassador(email='a1@example.com', name='Alice')
+        self.client.force_login(self.admin_user)
+
+        res = self.client.get(self.admin_url)
+        self.assertEqual(res.status_code, 200)
+        self.assertTrue(res.context['is_staff_view'])
+        self.assertEqual(res.context['registration_count'], 1)
+        self.assertContains(res, 'Preview Live Form')
+        self.assertContains(res, 'See Responses')
+        self.assertContains(res, 'Publish Form?')
+
+        t1 = self.client.post(self.toggle_url)
+        self.assertEqual(t1.status_code, 200)
+        self.assertTrue(json.loads(t1.content)['is_published'])
+
+        t2 = self.client.post(self.toggle_url)
+        self.assertEqual(t2.status_code, 200)
+        self.assertFalse(json.loads(t2.content)['is_published'])
+
+    def test_response_table_and_detail_view(self):
+        amb = make_ambassador(email='detail@example.com', name='Zara Khan')
+        amb.activities = ['social_media_posts', 'organizing_sessions']
+        amb.save()
+        self.client.force_login(self.admin_user)
+
+        table_res = self.client.get(self.table_url)
+        self.assertEqual(table_res.status_code, 200)
+        self.assertTemplateUsed(
+            table_res, 'ambassador_registration/ambassador_response_table.html'
+        )
+        self.assertContains(table_res, 'Zara Khan')
+        self.assertContains(table_res, 'Ambassadors (1)')
+        self.assertContains(table_res, 'Coming Soon')
+
+        detail_url = reverse('ambassador_registration:view_response', args=[amb.id])
+        detail_res = self.client.get(detail_url)
+        self.assertEqual(detail_res.status_code, 200)
+        self.assertTemplateUsed(
+            detail_res, 'ambassador_registration/ambassador_response_detail.html'
+        )
+        self.assertContains(detail_res, 'Zara Khan')
+        self.assertContains(detail_res, 'Social media posts and stories')
+        self.assertContains(detail_res, 'Organizing campus sessions')
+
+    def test_save_selected_bulk_updates_status(self):
+        a1 = make_ambassador(email='sel1@example.com', name='One')
+        a2 = make_ambassador(email='sel2@example.com', name='Two')
+        self.client.force_login(self.admin_user)
+
+        res = self.client.post(
+            self.save_url,
+            data=json.dumps({'selected_ids': [a1.id]}),
+            content_type='application/json',
+        )
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(json.loads(res.content)['status'], 'success')
+
+        a1.refresh_from_db()
+        a2.refresh_from_db()
+        self.assertTrue(a1.is_selected)
+        self.assertFalse(a2.is_selected)
+
+    def test_download_excel_has_three_required_sheets(self):
+        import openpyxl
+
+        a1 = make_ambassador(email='ieee@example.com', name='IEEE Amb')
+        a1.is_ieee_member = True
+        a1.ieee_number = '98765432'
+        a1.ieee_grade = 'student_member'
+        a1.ieee_branch = 'IEEE NSU SB'
+        a1.save()
+        make_ambassador(email='nonieee@example.com', name='Regular Amb')
+
+        self.client.force_login(self.admin_user)
+        res = self.client.get(self.excel_url)
+        self.assertEqual(res.status_code, 200)
+        self.assertIn('ambassador_data.xlsx', res['Content-Disposition'])
+
+        wb = openpyxl.load_workbook(BytesIO(res.content))
+        self.assertEqual(
+            wb.sheetnames, ['Ambassador Name', 'University Name', 'IEEE Members']
+        )
+        self.assertEqual(wb['Ambassador Name'].max_row, 3)  # header + 2 rows
+        self.assertEqual(wb['University Name'].max_row, 3)  # header + 2 rows
+        self.assertEqual(wb['IEEE Members'].max_row, 2)  # header + 1 IEEE row

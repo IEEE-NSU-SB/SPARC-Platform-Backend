@@ -1,4 +1,5 @@
 from django.db.models import Sum
+from ambassador_registration.models import Ambassador
 from registration.models import Form_Participant_Phase_1
 from .models import HackathonTeam_Phase01
 
@@ -11,6 +12,7 @@ def get_phase01_tab_counts() -> dict:
         'participants_count': Form_Participant_Phase_1.objects.count(),
         'hackathon_teams_count': HackathonTeam_Phase01.objects.count(),
         'hackathon_people_count': hackathon_totals['total_people'] or 0,
+        'ambassadors_count': Ambassador.objects.count(),
     }
 
 

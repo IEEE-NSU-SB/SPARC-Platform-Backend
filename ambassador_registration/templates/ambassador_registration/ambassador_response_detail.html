@@ -1,0 +1,269 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SPARC 2026 | {{ ambassador.name }} Details</title>
+    <link rel="icon" href="{% static 'img/logo.gif' %}" />
+
+    <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+    <script src="{% static 'js/particles.min.js' %}"></script>
+
+    <style>
+      #particles-js {
+        position: fixed;
+        inset: 0;
+        background-color: #002855;
+        z-index: -10;
+      }
+    </style>
+  </head>
+
+  <body class="min-h-screen py-10 px-4">
+    <div id="particles-js"></div>
+
+    <div class="relative z-10 w-full max-w-5xl mx-auto">
+      <!-- Top Bar -->
+      <div class="flex flex-wrap items-center justify-between gap-3 mb-6">
+        <a
+          href="{% url 'ambassador_registration:response_table' %}"
+          class="px-4 py-2 rounded-lg bg-white text-[#002855] font-semibold text-sm hover:bg-blue-100 transition-all shadow"
+        >
+          &larr; Back to Ambassador Responses
+        </a>
+
+        <a
+          href="{% url 'core:logout' %}"
+          class="px-4 py-2 rounded-lg bg-[#c22d2d85] hover:bg-[#c22d2d] text-white border-2 border-[#c22d2d] font-semibold text-sm transition-all"
+        >
+          Logout
+        </a>
+      </div>
+
+      <!-- Main Detail Card -->
+      <div class="bg-white rounded-2xl shadow-2xl overflow-hidden">
+        <!-- Applicant Banner Header -->
+        <div class="bg-[#1b395c] text-white px-6 py-6 md:px-8 flex flex-wrap items-center justify-between gap-4">
+          <div class="flex items-center gap-4">
+            {% if ambassador.photo %}
+            <a href="{{ ambassador.photo.url }}" target="_blank" rel="noopener noreferrer" title="Open full photo">
+              <img
+                src="{{ ambassador.photo.url }}"
+                alt="{{ ambassador.name }}"
+                class="w-16 h-16 md:w-20 md:h-20 rounded-full object-cover border-2 border-white shadow"
+              />
+            </a>
+            {% endif %}
+            <div>
+              <p class="text-xs uppercase tracking-wider text-sky-200 font-semibold">
+                SPARC 2026 &bull; Ambassador Application #{{ ambassador.id }}
+              </p>
+              <h1 class="text-2xl md:text-3xl font-bold mt-1">{{ ambassador.name }}</h1>
+              <p class="text-xs text-slate-200 mt-1">
+                Submitted on {{ ambassador.created_at|date:"M d, Y · h:i A" }}
+              </p>
+            </div>
+          </div>
+
+          <div class="flex flex-wrap items-center gap-2">
+            {% if ambassador.is_ieee_member %}
+            <span class="px-3 py-1 rounded-full text-xs font-bold bg-sky-100 text-sky-900">
+              IEEE Member
+            </span>
+            {% else %}
+            <span class="px-3 py-1 rounded-full text-xs font-bold bg-white/15 border border-white/30">
+              Non-IEEE
+            </span>
+            {% endif %}
+
+            {% if ambassador.is_selected %}
+            <span class="px-3 py-1 rounded-full text-xs font-bold bg-blue-100 text-blue-800">
+              Selected
+            </span>
+            {% else %}
+            <span class="px-3 py-1 rounded-full text-xs font-bold bg-yellow-100 text-yellow-800">
+              Not Selected
+            </span>
+            {% endif %}
+          </div>
+        </div>
+
+        <div class="p-6 md:p-8 space-y-8">
+          <!-- Section 1: Personal Information -->
+          <section class="border border-slate-200 rounded-xl p-5 bg-slate-50">
+            <h2 class="text-lg font-bold text-[#002855] border-b border-slate-200 pb-2 mb-4">
+              Section 1: Personal Information
+            </h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+              <div>
+                <p class="text-slate-500 font-medium">Full Name</p>
+                <p class="text-slate-900 font-semibold">{{ ambassador.name }}</p>
+              </div>
+              <div>
+                <p class="text-slate-500 font-medium">Email Address</p>
+                <p class="text-slate-900 font-semibold">{{ ambassador.email }}</p>
+              </div>
+              <div>
+                <p class="text-slate-500 font-medium">WhatsApp Number</p>
+                <p class="text-slate-900 font-semibold">{{ ambassador.whatsapp }}</p>
+              </div>
+              <div>
+                <p class="text-slate-500 font-medium">Date of Birth</p>
+                <p class="text-slate-900 font-semibold">{{ ambassador.date_of_birth|date:"M d, Y" }}</p>
+              </div>
+              <div>
+                <p class="text-slate-500 font-medium">Gender</p>
+                <p class="text-slate-900 font-semibold">{{ ambassador.get_gender_display }}</p>
+              </div>
+            </div>
+          </section>
+
+          <!-- Section 2: University Information -->
+          <section class="border border-slate-200 rounded-xl p-5 bg-slate-50">
+            <h2 class="text-lg font-bold text-[#002855] border-b border-slate-200 pb-2 mb-4">
+              Section 2: University Information
+            </h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+              <div>
+                <p class="text-slate-500 font-medium">University</p>
+                <p class="text-slate-900 font-semibold">{{ ambassador.university }}</p>
+              </div>
+              <div>
+                <p class="text-slate-500 font-medium">Department</p>
+                <p class="text-slate-900 font-semibold">{{ ambassador.department }}</p>
+              </div>
+              <div>
+                <p class="text-slate-500 font-medium">Current Year of Study</p>
+                <p class="text-slate-900 font-semibold">{{ ambassador.get_year_of_study_display }}</p>
+              </div>
+              <div>
+                <p class="text-slate-500 font-medium">Student ID</p>
+                <p class="text-slate-900 font-semibold">{{ ambassador.student_id }}</p>
+              </div>
+            </div>
+          </section>
+
+          <!-- Section 3: IEEE Information -->
+          <section class="border border-slate-200 rounded-xl p-5 bg-slate-50">
+            <h2 class="text-lg font-bold text-[#002855] border-b border-slate-200 pb-2 mb-4">
+              Section 3: IEEE Membership Details
+            </h2>
+            {% if ambassador.is_ieee_member %}
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+              <div>
+                <p class="text-slate-500 font-medium">IEEE Membership Number</p>
+                <p class="text-slate-900 font-mono font-semibold">{{ ambassador.ieee_number|default:"N/A" }}</p>
+              </div>
+              <div>
+                <p class="text-slate-500 font-medium">Membership Grade</p>
+                <p class="text-slate-900 font-semibold">{{ ambassador.get_ieee_grade_display|default:"N/A" }}</p>
+              </div>
+              <div>
+                <p class="text-slate-500 font-medium">IEEE Student Branch</p>
+                <p class="text-slate-900 font-semibold">{{ ambassador.ieee_branch|default:"N/A" }}</p>
+              </div>
+              <div>
+                <p class="text-slate-500 font-medium">Branch Position</p>
+                <p class="text-slate-900 font-semibold">{{ ambassador.ieee_position|default:"N/A" }}</p>
+              </div>
+            </div>
+            {% else %}
+            <p class="text-sm text-slate-500 italic">Applicant is not an IEEE member.</p>
+            {% endif %}
+          </section>
+
+          <!-- Section 4: Bio, Motivation & Activities -->
+          <section class="border border-slate-200 rounded-xl p-5 bg-slate-50 space-y-4">
+            <h2 class="text-lg font-bold text-[#002855] border-b border-slate-200 pb-2">
+              Section 4: Bio, Motivation &amp; Activities
+            </h2>
+
+            <div class="text-sm">
+              <p class="text-slate-500 font-medium mb-1">Short Bio for Website</p>
+              <p class="text-slate-900 bg-white p-3 rounded-lg border border-slate-200 whitespace-pre-line">{{ ambassador.bio }}</p>
+            </div>
+
+            <div class="text-sm">
+              <p class="text-slate-500 font-medium mb-1">Why do you want to become a SPARC Ambassador?</p>
+              <p class="text-slate-900 bg-white p-3 rounded-lg border border-slate-200 whitespace-pre-line">{{ ambassador.why_ambassador }}</p>
+            </div>
+
+            <div class="text-sm">
+              <p class="text-slate-500 font-medium mb-2">Comfortable Activities</p>
+              {% if readable_activities %}
+              <div class="flex flex-wrap gap-2">
+                {% for act in readable_activities %}
+                <span class="px-3 py-1 rounded-full text-xs font-semibold bg-[#00629B]/10 text-[#002855] border border-[#00629B]/30">
+                  {{ act }}
+                </span>
+                {% endfor %}
+              </div>
+              {% else %}
+              <p class="text-slate-500 italic">None selected.</p>
+              {% endif %}
+            </div>
+
+            <div class="text-sm">
+              <p class="text-slate-500 font-medium">How did you hear about SPARC?</p>
+              <p class="text-slate-900 font-semibold">{{ ambassador.get_heard_from_display }}</p>
+            </div>
+          </section>
+
+          <!-- Section 5: Agreements -->
+          <section class="border border-slate-200 rounded-xl p-5 bg-slate-50">
+            <h2 class="text-lg font-bold text-[#002855] border-b border-slate-200 pb-2 mb-4">
+              Section 5: Agreements &amp; Declarations
+            </h2>
+            <ul class="space-y-2 text-sm text-slate-800">
+              <li class="flex items-center gap-2">
+                <span class="{% if ambassador.agree_info_accurate %}text-emerald-600{% else %}text-red-600{% endif %} font-bold">
+                  {% if ambassador.agree_info_accurate %}&#10003;{% else %}&#10007;{% endif %}
+                </span>
+                <span>Confirmed all information provided is accurate.</span>
+              </li>
+              <li class="flex items-center gap-2">
+                <span class="{% if ambassador.agree_media_usage %}text-emerald-600{% else %}text-red-600{% endif %} font-bold">
+                  {% if ambassador.agree_media_usage %}&#10003;{% else %}&#10007;{% endif %}
+                </span>
+                <span>Agreed to SPARC using name, photo, and bio on website, social media, and ID card.</span>
+              </li>
+              <li class="flex items-center gap-2">
+                <span class="{% if ambassador.agree_points_ranking %}text-emerald-600{% else %}text-red-600{% endif %} font-bold">
+                  {% if ambassador.agree_points_ranking %}&#10003;{% else %}&#10007;{% endif %}
+                </span>
+                <span>Understood points &amp; performance-based ambassador ranking.</span>
+              </li>
+              <li class="flex items-center gap-2">
+                <span class="{% if ambassador.agree_contact_consent %}text-emerald-600{% else %}text-red-600{% endif %} font-bold">
+                  {% if ambassador.agree_contact_consent %}&#10003;{% else %}&#10007;{% endif %}
+                </span>
+                <span>Agreed to be contacted by email and WhatsApp about SPARC activities.</span>
+              </li>
+            </ul>
+          </section>
+        </div>
+      </div>
+
+      <!-- Footer -->
+      <div class="text-center mt-6 text-gray-200 text-sm italic">
+        2026 &copy; IEEE NSU Student Branch
+      </div>
+    </div>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        if (typeof particlesJS === "function" && document.getElementById("particles-js")) {
+          particlesJS("particles-js", {
+            particles: {
+              number: { value: 40 },
+              color: { value: "#fff" },
+              size: { value: 3 },
+              move: { speed: 1 },
+            },
+          });
+        }
+      });
+    </script>
+  </body>
+</html>

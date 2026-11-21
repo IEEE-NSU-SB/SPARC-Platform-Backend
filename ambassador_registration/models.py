@@ -1,6 +1,20 @@
 from django.db import models
 
 
+class AmbassadorFormStatus(models.Model):
+    """Independent publish/unpublish switch for SPARC Ambassador registration."""
+
+    is_published = models.BooleanField(default=False)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = 'Ambassador Form Status'
+        verbose_name_plural = 'Ambassador Form Statuses'
+
+    def __str__(self):
+        return 'Published' if self.is_published else 'Unpublished'
+
+
 class Ambassador(models.Model):
     """One SPARC Ambassador application (one row per form submission).
 
@@ -106,6 +120,9 @@ class Ambassador(models.Model):
     agree_contact_consent = models.BooleanField(
         'I agree to be contacted by email and WhatsApp about SPARC activities.',
         default=False)
+
+    # --- Administrative tracking ---
+    is_selected = models.BooleanField(default=False)
 
     created_at = models.DateTimeField(auto_now_add=True)
 

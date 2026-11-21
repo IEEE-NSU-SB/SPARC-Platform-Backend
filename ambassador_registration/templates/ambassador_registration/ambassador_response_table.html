@@ -1,0 +1,512 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SPARC 2026 | Ambassador Response Table</title>
+    <link rel="icon" href="{% static 'img/logo.gif' %}" />
+
+    <!-- Tailwind & DaisyUI (matching hackathon_response_table_phase01.html & response_table.html) -->
+    <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@5" rel="stylesheet" />
+
+    <!-- Particles -->
+    <script src="{% static 'js/particles.min.js' %}"></script>
+
+    <style>
+      #particles-js {
+        position: fixed;
+        inset: 0;
+        background-color: #002855;
+        z-index: -10;
+      }
+      tbody tr.data-row {
+        transition: all 0.2s ease-in-out;
+        cursor: pointer;
+        text-align: center;
+      }
+      tbody tr.data-row:hover {
+        background-color: #00285517;
+      }
+      .back-btn {
+        background: #ffffff;
+        color: #002855;
+        padding: 8px 16px;
+        border-radius: 6px;
+        border: 2px solid #ffffff;
+        font-weight: 600;
+        text-decoration: none;
+        transition: all 0.25s ease;
+      }
+      .back-btn:hover {
+        background: #dbeafe;
+        border-color: #dbeafe;
+      }
+      .logout {
+        background: #c22d2d85;
+        color: white;
+        padding: 8px 16px;
+        border-radius: 6px;
+        border: 2px solid #c22d2d;
+        text-decoration: none;
+      }
+      .logout:hover {
+        background: #c22d2d;
+        transition: 0.3s;
+      }
+      .statistics {
+        background: #e49e3581;
+        color: white;
+        padding: 8px 16px;
+        border-radius: 6px;
+        border: 2px solid #e49e35;
+        cursor: pointer;
+      }
+      .statistics:hover {
+        background: #e49e35;
+        transition: 0.3s;
+      }
+      .excel-btn {
+        background: #1b5c4a;
+        color: white;
+        padding: 8px 16px;
+        border-radius: 6px;
+        border: 2px solid #34d399;
+        text-decoration: none;
+        transition: all 0.25s ease;
+      }
+      .excel-btn:hover {
+        background: #009b55;
+      }
+      input::placeholder {
+        color: #cbd5e1;
+      }
+      input[type="checkbox"] {
+        width: 18px;
+        height: 18px;
+        cursor: pointer;
+      }
+    </style>
+  </head>
+
+  <body class="min-h-screen">
+    <div id="particles-js"></div>
+
+    <div
+      id="ambassadorResponseRoot"
+      class="relative w-11/12 max-w-7xl mx-auto py-10 z-10"
+      data-save-selected-url="{% url 'ambassador_registration:save_selected' %}"
+      data-csrf-token="{{ csrf_token }}"
+    >
+      <!-- Header -->
+      <div class="relative mb-12">
+        <div class="relative flex justify-center">
+          <span
+            class="px-10 py-3 text-[#fff] bg-[#002855] border-2 border-white text-xl md:text-3xl rounded-xl shadow-[2px_4px_0_0_#fff] text-center"
+          >
+            Ambassador Response Table
+          </span>
+        </div>
+      </div>
+
+      <!-- Top Utility Bar: Back, Excel, Logout, Statistics -->
+      <div class="flex flex-wrap items-center gap-3 justify-between mb-8">
+        <div class="flex flex-wrap items-center gap-3">
+          <a href="{% url 'registration:reg_landing' %}" class="back-btn">
+            &larr; Back
+          </a>
+          {% if has_perm.reg_form_control %}
+          <a href="{% url 'ambassador_registration:download_excel' %}" class="excel-btn">
+            Download Excel
+          </a>
+          {% endif %}
+        </div>
+
+        <div class="flex flex-wrap items-center gap-3">
+          <a href="{% url 'core:logout' %}" class="logout">Logout</a>
+          {% if has_perm.view_finance_info or has_perm.reg_form_control %}
+          <button
+            type="button"
+            class="statistics"
+            onclick="document.getElementById('statsModal').showModal()"
+          >
+            Statistics
+          </button>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Search & Bulk Action Controls -->
+      <div class="flex justify-between items-start max-md:flex-col-reverse flex-wrap max-md:gap-4 mb-6">
+        <input
+          id="tableSearch"
+          type="text"
+          placeholder="Search by name, email, WhatsApp, university, department, student ID, or IEEE no."
+          class="px-4 py-2.5 w-full md:w-1/2 rounded-lg shadow-sm bg-white/10 border-2 border-white/50 focus:border-white focus:outline-none text-white"
+        />
+
+        {% if has_perm.reg_form_control %}
+        <div class="flex justify-end gap-3 max-md:justify-center items-center max-md:flex-wrap max-md:w-full">
+          <button
+            type="button"
+            id="selectAllBtn"
+            class="px-5 py-2 max-md:w-full bg-[#1b395c] text-white rounded-lg shadow hover:bg-[#00629B] border-2 border-white/70 transition-all duration-300 ease-in-out cursor-pointer"
+          >
+            Select All
+          </button>
+          <button
+            type="button"
+            id="saveBtn"
+            class="px-5 py-2 max-md:w-full bg-[#1b395c] text-white rounded-lg shadow hover:bg-[#00629B] border-2 border-white/70 transition-all duration-300 ease-in-out cursor-pointer"
+          >
+            Save Selections
+          </button>
+          <button
+            type="button"
+            id="sendMailBtn"
+            disabled
+            title="Coming Soon"
+            class="px-5 py-2 max-md:w-full bg-slate-500/60 text-white/75 rounded-lg border-2 border-white/30 cursor-not-allowed"
+          >
+            Send Selection Email (Coming Soon)
+          </button>
+        </div>
+        {% endif %}
+      </div>
+
+      <!-- Inline Standalone URL-Backed Folder Tabs (Attached Flush to Table Container) -->
+      <nav class="flex flex-wrap items-end gap-1.5" aria-label="Phase 1 Response Lists">
+        <a
+          href="{% url 'registration:response_table_phase01' %}"
+          class="px-5 py-2.5 rounded-t-xl bg-blue-100 text-[#1b395c] hover:bg-white font-semibold text-sm border-2 border-b-0 border-white/40 transition-all"
+        >
+          Participants ({{ tab_counts.participants_count|default:0 }})
+        </a>
+
+        <a
+          href="{% url 'hackathon:response_table_phase01' %}"
+          class="px-5 py-2.5 rounded-t-xl bg-blue-100 text-[#1b395c] hover:bg-white font-semibold text-sm border-2 border-b-0 border-white/40 transition-all"
+        >
+          Hackathon ({{ tab_counts.hackathon_teams_count|default:0 }} teams &bull; {{ tab_counts.hackathon_people_count|default:0 }} people)
+        </a>
+
+        <a
+          href="{% url 'ambassador_registration:response_table' %}"
+          class="px-5 py-3 rounded-t-xl bg-[#1b395c] text-white font-semibold text-sm border-2 border-b-0 border-white/40 relative z-10"
+          aria-current="page"
+        >
+          Ambassadors ({{ tab_counts.ambassadors_count|default:0 }})
+        </a>
+      </nav>
+
+      <!-- Table Container -->
+      <div class="bg-white rounded-b-xl rounded-tr-xl shadow-lg overflow-x-auto max-h-[500px]">
+        <table class="min-w-full text-sm">
+          <thead class="sticky top-0 z-10">
+            <tr class="bg-[#1b395c] text-white">
+              <th class="px-4 py-3">ID</th>
+              <th class="px-4 py-3">Photo</th>
+              <th class="px-4 py-3">Full Name</th>
+              <th class="px-4 py-3">University</th>
+              <th class="px-4 py-3">Year</th>
+              <th class="px-4 py-3">Email</th>
+              <th class="px-4 py-3">IEEE</th>
+              <th class="px-4 py-3">Select</th>
+              <th class="px-4 py-3">Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for amb in ambassadors %}
+            <tr
+              class="border-b data-row"
+              data-href="{% url 'ambassador_registration:view_response' amb.id %}"
+              data-search="{{ amb.name }} {{ amb.email }} {{ amb.whatsapp }} {{ amb.university }} {{ amb.department }} {{ amb.student_id }} {{ amb.get_year_of_study_display }} {{ amb.ieee_number }} {{ amb.ieee_branch }}"
+            >
+              <td class="px-4 py-3 font-medium">{{ amb.id }}</td>
+              <td class="px-4 py-3">
+                {% if amb.photo %}
+                <img
+                  src="{{ amb.photo.url }}"
+                  alt="{{ amb.name }}"
+                  class="w-10 h-10 rounded-full object-cover mx-auto border border-slate-300"
+                />
+                {% else %}
+                <span class="text-xs text-slate-400">N/A</span>
+                {% endif %}
+              </td>
+              <td class="px-4 py-3 font-semibold text-[#002855]">{{ amb.name }}</td>
+              <td class="px-4 py-3">{{ amb.university }}</td>
+              <td class="px-4 py-3">
+                <span class="px-2.5 py-1 text-xs font-semibold bg-slate-100 text-slate-700 rounded-full">
+                  {{ amb.get_year_of_study_display }}
+                </span>
+              </td>
+              <td class="px-4 py-3">{{ amb.email }}</td>
+              <td class="px-4 py-3">
+                {% if amb.is_ieee_member %}
+                <span class="px-2.5 py-1 text-xs font-semibold bg-blue-100 text-blue-800 rounded-full">
+                  Yes
+                </span>
+                {% else %}
+                <span class="px-2.5 py-1 text-xs font-semibold bg-slate-100 text-slate-600 rounded-full">
+                  No
+                </span>
+                {% endif %}
+              </td>
+              <td class="px-4 py-3">
+                <input
+                  type="checkbox"
+                  class="ambassadorSelectCheck"
+                  data-id="{{ amb.id }}"
+                  {% if amb.is_selected %}checked{% endif %}
+                  {% if not has_perm.reg_form_control %}disabled{% endif %}
+                />
+              </td>
+              <td class="px-4 py-3">
+                {% if amb.is_selected %}
+                <span class="px-3 py-1 text-xs bg-blue-100 text-blue-700 rounded-full text-nowrap">
+                  Selected
+                </span>
+                {% else %}
+                <span class="px-3 py-1 text-xs bg-yellow-100 text-yellow-700 rounded-full text-nowrap">
+                  Not Selected
+                </span>
+                {% endif %}
+              </td>
+            </tr>
+            {% empty %}
+            <tr>
+              <td colspan="9" class="text-center py-8 text-gray-500">
+                No ambassador applications registered yet
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Footer -->
+      <div class="text-center mt-6 text-gray-200 text-sm italic">
+        2026 &copy; IEEE NSU Student Branch
+      </div>
+    </div>
+
+    <!-- Statistics Modal -->
+    {% if has_perm.view_finance_info or has_perm.reg_form_control %}
+    <dialog id="statsModal" class="modal">
+      <div class="modal-box max-w-3xl">
+        <h2 class="text-2xl font-bold mb-4 text-[#002855]">SPARC Ambassador Statistics</h2>
+
+        <!-- Summary Totals -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-5">
+          <div class="p-3 rounded-lg bg-slate-100 text-center">
+            <p class="text-xs text-slate-500 uppercase font-semibold">Total Applications</p>
+            <p class="text-2xl font-bold text-[#002855]">{{ reg_stats.total_ambassadors|default:0 }}</p>
+          </div>
+          <div class="p-3 rounded-lg bg-green-50 text-center">
+            <p class="text-xs text-green-700 uppercase font-semibold">Selected Ambassadors</p>
+            <p class="text-2xl font-bold text-green-700">{{ reg_stats.total_selected|default:0 }}</p>
+          </div>
+          <div class="p-3 rounded-lg bg-blue-50 text-center">
+            <p class="text-xs text-[#00629B] uppercase font-semibold">IEEE Members</p>
+            <p class="text-2xl font-bold text-[#00629B]">{{ reg_stats.ieee_members|default:0 }}</p>
+          </div>
+        </div>
+
+        <!-- Gender & IEEE Breakdown -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-5">
+          <div class="overflow-x-auto">
+            <table class="table table-zebra w-full border text-center">
+              <thead class="bg-[#112640] text-white">
+                <tr>
+                  <th class="py-2 px-4">Demographics</th>
+                  <th class="py-2 px-4">Count</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td class="py-2 px-4">Male</td>
+                  <td class="py-2 px-4 font-semibold">{{ reg_stats.male_count|default:0 }}</td>
+                </tr>
+                <tr>
+                  <td class="py-2 px-4">Female</td>
+                  <td class="py-2 px-4 font-semibold">{{ reg_stats.female_count|default:0 }}</td>
+                </tr>
+                <tr>
+                  <td class="py-2 px-4">IEEE Member</td>
+                  <td class="py-2 px-4 font-semibold">{{ reg_stats.ieee_members|default:0 }}</td>
+                </tr>
+                <tr>
+                  <td class="py-2 px-4">Non-IEEE Member</td>
+                  <td class="py-2 px-4 font-semibold">{{ reg_stats.non_ieee_members|default:0 }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="overflow-x-auto">
+            <table class="table table-zebra w-full border text-center">
+              <thead class="bg-[#112640] text-white">
+                <tr>
+                  <th class="py-2 px-4">Year of Study</th>
+                  <th class="py-2 px-4">Count</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for item in year_data %}
+                <tr>
+                  <td class="py-2 px-4">{{ item.label }}</td>
+                  <td class="py-2 px-4 font-semibold">{{ item.total }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                  <td colspan="2" class="py-2 px-4 text-gray-500 italic">No data yet</td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- University Distribution -->
+        <div class="mt-4 text-left">
+          <p class="font-semibold text-slate-700 mb-2">University Breakdown:</p>
+          <ul class="max-h-60 overflow-y-auto">
+            {% for uni in university_data %}
+            <li class="flex items-center px-4 py-2 my-1.5 text-sm text-gray-800 bg-gray-100 rounded-md shadow-sm hover:bg-gray-200">
+              <span class="font-medium">{{ uni.university_sanitized }}</span>
+              <span class="ml-2 text-gray-500">&ndash;</span>
+              <span class="ml-2 text-gray-700 font-bold">[{{ uni.total }}]</span>
+            </li>
+            {% empty %}
+            <li class="text-sm text-gray-500 italic">No university data recorded yet.</li>
+            {% endfor %}
+          </ul>
+        </div>
+
+        <div class="modal-action">
+          <form method="dialog">
+            <button class="btn">Close</button>
+          </form>
+        </div>
+      </div>
+    </dialog>
+    {% endif %}
+
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        // 1. Initialize Particles Background
+        if (typeof particlesJS === "function" && document.getElementById("particles-js")) {
+          particlesJS("particles-js", {
+            particles: {
+              number: { value: 40 },
+              color: { value: "#fff" },
+              size: { value: 3 },
+              move: { speed: 1 },
+            },
+          });
+        }
+
+        const root = document.getElementById("ambassadorResponseRoot");
+        if (!root) return;
+
+        const saveSelectedUrl = root.dataset.saveSelectedUrl;
+        const csrfToken = root.dataset.csrfToken;
+        const searchInput = document.getElementById("tableSearch");
+        const selectAllBtn = document.getElementById("selectAllBtn");
+        const saveBtn = document.getElementById("saveBtn");
+
+        // 2. Live Search Filter
+        if (searchInput) {
+          searchInput.addEventListener("input", function () {
+            const query = this.value.toLowerCase().trim();
+            document.querySelectorAll("tbody tr.data-row").forEach((row) => {
+              const haystack = (row.dataset.search || row.innerText || "")
+                .replace(/\s+/g, " ")
+                .toLowerCase();
+              row.style.display = haystack.includes(query) ? "" : "none";
+            });
+          });
+        }
+
+        // 3. Row Click Navigation (Ignoring Checkbox Clicks)
+        document.querySelectorAll("tbody tr.data-row").forEach((row) => {
+          row.addEventListener("click", function (e) {
+            if (e.target.closest("input") || e.target.closest("label") || e.target.closest("button")) {
+              return;
+            }
+            const href = row.dataset.href;
+            if (href) {
+              window.location.href = href;
+            }
+          });
+        });
+
+        // 4. Select All / Deselect All (Scoped to Currently Visible Rows)
+        if (selectAllBtn) {
+          selectAllBtn.addEventListener("click", function () {
+            const visibleCheckboxes = [
+              ...document.querySelectorAll("tbody tr.data-row"),
+            ]
+              .filter((row) => row.style.display !== "none")
+              .map((row) => row.querySelector(".ambassadorSelectCheck:not(:disabled)"))
+              .filter(Boolean);
+
+            if (!visibleCheckboxes.length) return;
+
+            const allChecked = visibleCheckboxes.every((cb) => cb.checked);
+            visibleCheckboxes.forEach((cb) => {
+              cb.checked = !allChecked;
+            });
+          });
+        }
+
+        // 5. Save Selections Bulk Endpoint
+        if (saveBtn && saveSelectedUrl) {
+          saveBtn.addEventListener("click", async function () {
+            const selectedIds = [
+              ...document.querySelectorAll(".ambassadorSelectCheck:checked:not(:disabled)"),
+            ].map((cb) => parseInt(cb.dataset.id, 10));
+
+            if (selectedIds.length === 0) {
+              const proceed = confirm(
+                "No ambassadors are currently checked. Save and mark all ambassadors as Not Selected?"
+              );
+              if (!proceed) return;
+            }
+
+            saveBtn.disabled = true;
+            const originalText = saveBtn.textContent;
+            saveBtn.textContent = "Saving...";
+
+            try {
+              const response = await fetch(saveSelectedUrl, {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                  "X-CSRFToken": csrfToken,
+                },
+                body: JSON.stringify({ selected_ids: selectedIds }),
+              });
+
+              const data = await response.json();
+              if (response.ok && data.status === "success") {
+                alert(data.message || "Ambassador selections updated successfully!");
+                window.location.reload();
+              } else {
+                alert(data.message || "Failed to save ambassador selections.");
+              }
+            } catch (err) {
+              console.error("Error saving ambassador selections:", err);
+              alert("Network error while saving ambassador selections.");
+            } finally {
+              saveBtn.disabled = false;
+              saveBtn.textContent = originalText;
+            }
+          });
+        }
+      });
+    </script>
+  </body>
+</html>

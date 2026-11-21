@@ -3,7 +3,7 @@ from django.shortcuts import redirect
 from django.urls import path, reverse
 from django.utils.html import format_html
 
-from .models import Ambassador
+from .models import Ambassador, AmbassadorFormStatus
 from ambassador_email.models import MailJob
 from ambassador_email.sender import build_service, process_job
 
@@ -90,9 +90,9 @@ class EmailStatusFilter(admin.SimpleListFilter):
 class AmbassadorAdmin(admin.ModelAdmin):
     list_display = (
         'id', 'photo_thumbnail', 'name', 'email', 'university',
-        'year_of_study', 'is_ieee_member', 'email_status', 'email_action', 'created_at')
+        'year_of_study', 'is_ieee_member', 'is_selected', 'email_status', 'email_action', 'created_at')
     list_filter = (
-        EmailStatusFilter, 'year_of_study', 'gender', 'is_ieee_member',
+        EmailStatusFilter, 'is_selected', 'year_of_study', 'gender', 'is_ieee_member',
         'heard_from', 'created_at'
     )
     search_fields = ('name', 'email', 'university', 'department', 'student_id')
@@ -122,7 +122,7 @@ class AmbassadorAdmin(admin.ModelAdmin):
             'fields': ('agree_info_accurate', 'agree_media_usage',
                        'agree_points_ranking', 'agree_contact_consent'),
         }),
-        ('Timestamps', {'fields': ('created_at',)}),
+        ('Timestamps & Status', {'fields': ('is_selected', 'created_at')}),
     )
 
     def get_queryset(self, request):
@@ -274,3 +274,9 @@ class AmbassadorAdmin(admin.ModelAdmin):
                 request, 'Nothing to send - selection contains only already-sent emails (use Force resend if needed).',
                 level=messages.INFO
             )
+
+
+@admin.register(AmbassadorFormStatus)
+class AmbassadorFormStatusAdmin(admin.ModelAdmin):
+    list_display = ('is_published', 'updated_at')
+    readonly_fields = ('updated_at',)

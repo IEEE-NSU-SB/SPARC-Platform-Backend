@@ -352,7 +352,9 @@
             {% comment %} <span class="disabled-btn">Coming Soon</span> {% endcomment %}
           </td>
           <td>
-            <span class="disabled-btn">Coming Soon</span>
+            <a href="{% url 'ambassador_registration:response_table' %}" class="table-btn">
+              View
+            </a>
           </td>
           <td></td>
         </tr>
@@ -409,7 +411,9 @@
 
     <div class="mobile-item">
       <span>Responses</span>
-      <span class="disabled-btn">Coming Soon</span>
+      <a href="{% url 'ambassador_registration:response_table' %}" class="table-btn">
+        View
+      </a>
     </div>
   </div>
 
